@@ -1,7 +1,7 @@
 import chess
 from result import Result
 
-CUTOFF = 5
+CUTOFF = 3
 
 best_mate = [None for _ in range(10)]
 
@@ -50,6 +50,7 @@ def calculate_utility(state: chess.Board, depth: int):
             best_mate = state.move_stack
     else:
         utility = 0
+    # if 0 black has made a move that turned game to checkmate (white is checking for this)
     if depth % 2 == 0:
         utility *= -1
     return utility 
@@ -57,7 +58,13 @@ def calculate_utility(state: chess.Board, depth: int):
 # Mate in 1 position
 m5 = chess.Board("1k6/8/2Q5/8/8/2K5/8/8 w - - 0 1")
 m3 = chess.Board("1k6/8/2QK4/8/8/8/8/8 w - - 0 1")
+rm3 = chess.Board("8/2k5/5R2/4R3/8/8/8/3K4 w - - 0 1")
+rm2 = chess.Board("8/k7/6RR/8/8/8/8/4K3 w - - 0 1")
 
 
-search(m3)
-print(best_mate)
+#print(search(rm2))
+while (rm2.is_game_over() != True):
+    move = search(rm2)
+    print(move)
+    rm2.push(move)
+#print(best_mate)
