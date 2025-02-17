@@ -1,15 +1,13 @@
 import chess
 from result import Result
 
-CUTOFF = 4
-
-best_mate = [None for _ in range(10)]
+CUTOFF = 5
 
 def search(state: chess.Board) -> chess.Move:
-    result: Result = max_value(state, None, 0)
+    result: Result = max_value(state, None, 0, float('-inf'), float('inf'))
     return result.move
 
-def max_value(state: chess.Board, move: chess.Move, depth: int) -> Result:
+def max_value(state: chess.Board, move: chess.Move, depth: int, alpha: int, beta: int) -> Result:
     if state.outcome() or depth == CUTOFF:
         # TODO: handle board initial position is mate
         return Result(move, calculate_utility(state, depth))
@@ -19,13 +17,16 @@ def max_value(state: chess.Board, move: chess.Move, depth: int) -> Result:
     for a in state.legal_moves:
         state2 = state.copy()
         state2.push(a)
-        result: Result = min_value(state2, a, depth + 1)
+        result: Result = min_value(state2, a, depth + 1, alpha, beta)
         if result.value > best_move.value:
             best_move.value = result.value
             best_move.move = a
+            alpha = max(best_move.value, alpha)
+        if best_move.value >= beta:
+            return best_move
     return best_move
 
-def min_value(state: chess.Board, move: chess.Move, depth: int) -> Result:
+def min_value(state: chess.Board, move: chess.Move, depth: int, alpha: int, beta: int) -> Result:
     if state.outcome() or depth == CUTOFF:
         # TODO: handle board initial position is mate
         return Result(move, calculate_utility(state, depth))
@@ -35,19 +36,19 @@ def min_value(state: chess.Board, move: chess.Move, depth: int) -> Result:
     for a in state.legal_moves:
         state2 = state.copy()
         state2.push(a)
-        result: Result = max_value(state2, a, depth + 1)
+        result: Result = max_value(state2, a, depth + 1, alpha, beta)
         if result.value < best_move.value:
             best_move.value = result.value
             best_move.move = a
+            beta = min(best_move.value, beta)
+        if best_move.value <= alpha:
+            return best_move
     return best_move
 
-def calculate_utility(state: chess.Board, depth: int):
-    utility: float = 0
+def calculate_utility(state: chess.Board, depth: int) -> int:
+    utility: int = 0
     if state.is_checkmate():
         utility = 1 + (CUTOFF - depth)
-        global best_mate
-        if len(state.move_stack) < len(best_mate):
-            best_mate = state.move_stack
     else:
         utility = 0
     # if 0 black has made a move that turned game to checkmate (white is checking for this)
