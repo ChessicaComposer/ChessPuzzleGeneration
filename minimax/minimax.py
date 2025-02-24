@@ -1,6 +1,7 @@
 import chess
 from result import Result
 from functools import cache
+from copy import deepcopy
 
 CUTOFF = 5
 
@@ -83,8 +84,8 @@ def calculate_utility(state: chess.Board, depth: int) -> int:
     if state.is_checkmate():
         utility = 1 + (CUTOFF - depth)
         global best_sequence
-        if len(best_sequence) >= len(tmp_sequence):
-            best_sequence = tmp_sequence.copy()
+        if len(best_sequence) >= len(tmp_sequence) and depth % 2 != 0:
+            best_sequence = deepcopy(tmp_sequence)
     else:
         utility = 0
     # if 0 black has made a move that turned game to checkmate (white is checking for this)
@@ -113,5 +114,5 @@ m2_7 = chess.Board("r1nk3r/2b2ppp/p3b3/3NN3/Q2P3q/B2B4/P4PPP/4R1K1 w - - 1 0")
 m2_8 = chess.Board("r4br1/3b1kpp/1q1P4/1pp1RP1N/p7/6Q1/PPB3PP/2KR4 w - - 1 0")
 m2_9 = chess.Board("r1b2k1r/ppppq3/5N1p/4P2Q/4PP2/1B6/PP5P/n2K2R1 w - - 1 0")
 
-search(m3_loaded_3)
+search(m2_7)
 print(*best_sequence)
