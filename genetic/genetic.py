@@ -1,11 +1,12 @@
 class Genetic:
     # Define parameters
-    def __init__(self):
+    def __init__(self, evaluator=None):
         self.population_evaluations: list[float] # avg scores per population
+        self.evaluator = evaluator
 
 
     # Fitness function
-    def __fitness(self) -> float:
+    def __fitness(self, chromosome: list[int]) -> float:
         raise NotImplementedError()
     
 
@@ -14,7 +15,7 @@ class Genetic:
 
 
     # Create population
-    def __create_population(self) -> list[list[int]]:
+    def __create_population(self, amount) -> list[list[int]]:
         raise NotImplementedError()
     
 
