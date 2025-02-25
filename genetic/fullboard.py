@@ -1,24 +1,24 @@
-from genetic import Genetic
-from utility import chess_board_to_int
+from .genetic import Genetic
+from common.evaluator import Evaluator, EvaluatorResponse
+from .utility import chess_board_to_int
 from random import randint
 import chess
 
 class FullBoard(Genetic):
-    def __init__(self, evaluator=None):
+    def __init__(self, evaluator: Evaluator=None):
         super().__init__(evaluator)
-        self.evaluator = evaluator
 
     
-    def __fitness(self, chromosome: list[int]) -> float:
+    def _fitness(self, chromosome: list[int]) -> float:
         raise NotImplementedError()
     
 
-    def __mutate(self, population: list[list[int]]) -> list[list[int]]:
+    def _mutate(self, population: list[list[int]]) -> list[list[int]]:
         raise NotImplementedError()
 
 
     # Create population
-    def __create_population(self, amount: int) -> list[list[int]]:
+    def _create_population(self, amount: int) -> list[list[int]]:
         moves = 24
         boards = [chess.Board() for _ in range(amount)]
         population = []
@@ -33,9 +33,11 @@ class FullBoard(Genetic):
             board_int = chess_board_to_int(board)
             
             population.append(board_int)
+        
+        return population
     
 
-    def __run_tournament(self, population: list[list[int]], evaluations: list[float]) -> list[list[int]]:
+    def _run_tournament(self, population: list[list[int]], evaluations: list[float]) -> list[list[int]]:
         raise NotImplementedError()
         """ selection = list(zip(population, evaluations))
         selection.sort(key=lambda x: x[1])
@@ -43,9 +45,9 @@ class FullBoard(Genetic):
         return selection """
     
 
-    def __reproduce(self, population: list[list[int]]) -> list[list[int]]:
+    def _reproduce(self, population: list[list[int]]) -> list[list[int]]:
         raise NotImplementedError()
     
     
-    def __stop_condition(self, generation) -> bool:
+    def _stop_condition(self, generation) -> bool:
         raise NotImplementedError()

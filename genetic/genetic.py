@@ -1,38 +1,40 @@
+from common.evaluator import Evaluator
+
 class Genetic:
     # Define parameters
-    def __init__(self, evaluator=None):
+    def __init__(self, evaluator: Evaluator=None):
         self.population_evaluations: list[float] # avg scores per population
-        self.evaluator = evaluator
+        self.evaluator: Evaluator = evaluator
 
 
     # Fitness function
-    def __fitness(self, chromosome: list[int]) -> float:
+    def _fitness(self, chromosome: list[int]) -> float:
         raise NotImplementedError()
     
 
-    def __mutate(self, population: list[list[int]]) -> list[list[int]]:
+    def _mutate(self, population: list[list[int]]) -> list[list[int]]:
         raise NotImplementedError()
 
 
     # Create population
-    def __create_population(self, amount) -> list[list[int]]:
+    def _create_population(self, amount: int) -> list[list[int]]:
         raise NotImplementedError()
     
 
     # Return list representing score of individual chromosome from population
-    def __evaluate_population(self, population: list[list[int]]) -> list[float]:
+    def _evaluate_population(self, population: list[list[int]]) -> list[float]:
         evaluations = []
         score = 0.0
         for chromosome in population:
             # TODO: Add parallelisation
-            score += self.__fitness(chromosome)
+            score += self._fitness(chromosome)
             evaluations.append(score)
         
         self.population_evaluations.append(score / len(population))
         return evaluations
     
 
-    def __run_tournament(self, population: list[list[int]], evaluations: list[float]) -> list[list[int]]:
+    def _run_tournament(self, population: list[list[int]], evaluations: list[float]) -> list[list[int]]:
         raise NotImplementedError()
         """ selection = list(zip(population, evaluations))
         selection.sort(key=lambda x: x[1])
@@ -40,38 +42,38 @@ class Genetic:
         return selection """
     
 
-    def __reproduce(self, population: list[list[int]]) -> list[list[int]]:
+    def _reproduce(self, population: list[list[int]]) -> list[list[int]]:
         raise NotImplementedError()
     
     
-    def __stop_condition(self, generation) -> bool:
+    def _stop_condition(self, generation) -> bool:
         raise NotImplementedError()
 
 
-    def run(self, generations):
+    def run(self, generations: int, population_size: int):
         # Initialize population
-        population = self.__create_population()
+        population = self._create_population(population_size)
         
         # Initial evaluation
-        evaluations = self.__evaluate_population(population)
+        evaluations = self._evaluate_population(population)
 
         generation = 0
         
         # Evaluate cost
         for _ in range(generations):
             # Select mate
-            parents = self.__run_tournament(population, evaluations)
+            parents = self._run_tournament(population, evaluations)
 
             # Reproduce
-            children = self.__reproduce(parents)
+            children = self._reproduce(parents)
 
             # Mutate
-            children = self.__mutate(children)
+            children = self._mutate(children)
 
             # Evaluate new generation
-            evaluations = self.__evaluate_population(population)
+            evaluations = self._evaluate_population(population)
             generation += 1
             
             # Test
-            if self.__stop_condition(generation):
+            if self._stop_condition(generation):
                 break
