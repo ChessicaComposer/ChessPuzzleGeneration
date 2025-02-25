@@ -104,6 +104,7 @@ m2_7 = chess.Board("r1nk3r/2b2ppp/p3b3/3NN3/Q2P3q/B2B4/P4PPP/4R1K1 w - - 1 0")
 m2_8 = chess.Board("r4br1/3b1kpp/1q1P4/1pp1RP1N/p7/6Q1/PPB3PP/2KR4 w - - 1 0")
 m2_9 = chess.Board("r1b2k1r/ppppq3/5N1p/4P2Q/4PP2/1B6/PP5P/n2K2R1 w - - 1 0")
 
+no_mate = chess.Board("2bqkbr1/rpp3pp/3ppp2/p2n4/1PN3PN/n3P3/P1PPKP1P/1RBQ1B1R w - - 1 13")
 
 # Current lazy way of printing mate sequence (Test for an existing sequence before calling if unsure)
 def print_sequence(state: chess.Board):
@@ -113,6 +114,8 @@ def print_sequence(state: chess.Board):
         state.push(move)
         global CUTOFF
         CUTOFF -= 1
+
+print(search(no_mate))
 
 #print_sequence(m3_loaded)
 #print(search(m2_5))
