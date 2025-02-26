@@ -74,4 +74,4 @@ class Genetic:
                 break
 
         print(self.population_evaluations)
-        return population, self.population_evaluations
+        return population, evaluations

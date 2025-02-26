@@ -15,7 +15,6 @@ class FullBoard(Genetic):
             return -10
         evaluation: EvaluatorResponse = self.evaluator.run(board)
         if evaluation.has_mate:
-            print("Mate found!")
             return 10
         else:
             return 0
@@ -26,7 +25,8 @@ class FullBoard(Genetic):
                 board = chess_int_to_board(population[i])
                 for _ in range(randint(1, 10)):
                     legal_moves = board.legal_moves
-                    board.push(list(legal_moves)[randint(0, legal_moves.count() - 1)])
+                    if legal_moves is not None:
+                        board.push(list(legal_moves)[randint(0, legal_moves.count() - 1)])
                 board = chess_board_to_int(board)
                 population[i] = board
 
@@ -34,7 +34,7 @@ class FullBoard(Genetic):
 
     # Create population
     def _create_population(self, amount: int) -> list[list[int]]:
-        moves = 24
+        moves = 48
         boards = [chess.Board() for _ in range(amount)]
         population = []
 
