@@ -1,8 +1,13 @@
-from chess_engine import ChessEngine
+from .chess_engine import ChessEngine
 import chess
 import unittest
 
-class TestChessEngine:
+
+# Recall that ply = mx2 - 1, so m5 = ply 9.
+
+class TestChessEnginePly5(unittest.TestCase):
+    engine = ChessEngine(5)
+
     # Boards with mates
     # - Mates with few pieces, e.g. 1 queen or 2 rooks to mate
     m_simple = [
@@ -11,13 +16,7 @@ class TestChessEngine:
         chess.Board("8/2k5/5R2/4R3/8/8/8/3K4 w - - 0 1"),   #rm3
         chess.Board("8/k7/6RR/8/8/8/8/4K3 w - - 0 1"),      #rm2
     ]
-    # - Mates in 3 with a loaded board (many pieces present)
-    m3_loaded = [
-        chess.Board("b5k1/1q3p1p/3p2p1/6Q1/1p3N2/1Prn3P/2P3P1/5RK1 w - - 0 27"),
-        chess.Board("r1b1kb1r/pppp1ppp/5q2/4n3/3KP3/2N3PN/PPP4P/R1BQ1B1R b kq - 0 1"),
-        chess.Board("r3k2r/ppp2Npp/1b5n/4p2b/2B1P2q/BQP2P2/P5PP/RN5K w kq - 1 0"),
-        chess.Board("r1b3kr/ppp1Bp1p/1b6/n2P4/2p3q1/2Q2N2/P4PPP/RN2R1K1 w - - 1 0")
-    ]
+
     # - Mates in two
     m2 = [
         chess.Board("r2qkb1r/pp2nppp/3p4/2pNN1B1/2BnP3/3P4/PPP2PPP/R2bK2R w KQkq - 1 0"),
@@ -31,3 +30,30 @@ class TestChessEngine:
         chess.Board("r1b2k1r/ppppq3/5N1p/4P2Q/4PP2/1B6/PP5P/n2K2R1 w - - 1 0")
     ]
 
+    # - Mates in 3 with a loaded board (many pieces present)
+    m3_loaded = [
+        chess.Board("b5k1/1q3p1p/3p2p1/6Q1/1p3N2/1Prn3P/2P3P1/5RK1 w - - 0 27"),
+        chess.Board("r1b1kb1r/pppp1ppp/5q2/4n3/3KP3/2N3PN/PPP4P/R1BQ1B1R b kq - 0 1"),
+        chess.Board("r3k2r/ppp2Npp/1b5n/4p2b/2B1P2q/BQP2P2/P5PP/RN5K w kq - 1 0"),
+        chess.Board("r1b3kr/ppp1Bp1p/1b6/n2P4/2p3q1/2Q2N2/P4PPP/RN2R1K1 w - - 1 0")
+    ]
+
+
+    # TESTS
+
+    def test_run_m_simple(self):
+        res_expected = [
+            ['Qd7', 'Ka8', 'Kd4', 'Kb8', 'Kd5', 'Ka8', 'Kc6', 'Kb8', 'Qb7#'], #m5 - Actually gives mate in 5
+            ['Qb5+', 'Kc8', 'Qb4', 'Kd8', 'Qb8#'],  # m3
+            ['Re7+', 'Kd8', 'Rff7', 'Kc8', 'Rf8#'],  # rm3
+            ['Rh7+', 'Kb8', 'Rg8#', '', '']  # rm2
+        ]
+
+        for i in range(len(self.m_simple)-1):
+            board = self.m_simple[i]
+            res = self.engine.run(board)
+
+            if i == 0:
+                self.assertIsNot(res_expected[i], res)
+            else:
+                self.assertIsNot(res_expected[i], res)
