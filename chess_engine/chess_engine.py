@@ -17,11 +17,11 @@ Author: Bruce Moreland 2001
 Last modified: 11/04/02
 """
 
+
 class ChessEngine(Evaluator):
     def __init__(self, cutoff: int = 5):
         super().__init__()
         self.cutoff = cutoff
-        self.__has_mate = False
 
     @cache
     def __is_forward(self, move: str, white: bool) -> bool:
@@ -30,16 +30,19 @@ class ChessEngine(Evaluator):
         else:
             return False if white else True
 
-    def __reset(self):
-        self.__has_mate = False
-
     def run(self, board: chess.Board) -> EvaluatorResponse:
-        self.__reset()
+        if not board.is_valid():
+            raise ValueError("Invalid chess board")
         line = ["" for _ in range(self.cutoff)]
         self.__max_value(board, None, 0, float('-inf'), float('inf'), line)
-        return EvaluatorResponse(self.__has_mate)
+        line = list(filter(lambda x: x != "", line))
+        board_copy = board.copy()
+        for move in line:
+            board_copy.push(move)
+        return EvaluatorResponse(board_copy.is_checkmate())
 
-    def __max_value(self, state: chess.Board, move: chess.Move, depth: int, alpha: int, beta: int, pline: list[str]) -> Result:
+    def __max_value(self, state: chess.Board, move: chess.Move, depth: int, alpha: int, beta: int,
+                    pline: list[str]) -> Result:
         if state.outcome() or depth == self.cutoff:
             # TODO: handle board initial position is mate
             return Result(move, self.__calculate_utility(state, depth))
@@ -61,7 +64,7 @@ class ChessEngine(Evaluator):
             if result.value > best_move.value:
                 best_move.value = result.value
                 best_move.move = a
-                if best_move.value > alpha:    
+                if best_move.value > alpha:
                     pline[0] = best_move.move
                     for i in range(len(line) - 1):
                         pline[i + 1] = line[i]
@@ -70,7 +73,8 @@ class ChessEngine(Evaluator):
                 return best_move
         return best_move
 
-    def __min_value(self, state: chess.Board, move: chess.Move, depth: int, alpha: int, beta: int, pline: list[str]) -> Result:
+    def __min_value(self, state: chess.Board, move: chess.Move, depth: int, alpha: int, beta: int,
+                    pline: list[str]) -> Result:
         if state.outcome() or depth == self.cutoff:
             # TODO: handle board initial position is mate
             return Result(move, self.__calculate_utility(state, depth))
