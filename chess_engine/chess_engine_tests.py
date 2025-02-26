@@ -1,5 +1,3 @@
-from unittest import expectedFailure
-
 from .chess_engine import ChessEngine
 import chess
 import unittest
@@ -44,7 +42,6 @@ class TestChessEnginePly5(unittest.TestCase):
     # TESTS
     # - run()
 
-    @expectedFailure
     def test_run_m_simple(self):
         for i in range(len(self.m_simple)-1):
             board = self.m_simple[i]
@@ -55,7 +52,6 @@ class TestChessEnginePly5(unittest.TestCase):
             else:
                 self.assertEqual(True, res)
 
-    @expectedFailure
     def test_run_m2(self):
         for i in range(len(self.m2)-1):
             board = self.m2[i]
@@ -63,7 +59,6 @@ class TestChessEnginePly5(unittest.TestCase):
 
             self.assertEqual(True, res)
 
-    @expectedFailure
     def test_run_m3_loaded(self):
         for i in range(len(self.m3_loaded)-1):
             board = self.m3_loaded[i]
