@@ -5,8 +5,8 @@ import chess
 
 # Test
 engine = ChessEngine(5)
-test_board = chess.Board("r3k2r/ppp2Npp/1b5n/4p2b/2B1P2q/BQP2P2/P5PP/RN5K w kq - 1 0")
+test_board = chess.Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 res = engine.run(test_board)
 
-genetic = FullBoard(engine)
-genetic.run(5, 10)
+#genetic = FullBoard(engine)
+#genetic.run(5, 10)

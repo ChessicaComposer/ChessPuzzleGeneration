@@ -3,12 +3,24 @@ from .result import Result
 from functools import cache
 from common.evaluator import Evaluator, EvaluatorResponse
 
+"""
+Sources
+
+Minimax Algorithm and Alpha-Beta Pruning
+Implementation based on Russel S. and Norvig P.
+"Artificial Intelligence: A Modern Approach"
+ISBN 13: 978-0-13-461099-3
+
+Principle Variation Line used in max_value and min_value
+Inspired by "PV-List on the Stack": https://www.chessprogramming.org/Principal_Variation#:~:text=The%20Principal%20variation%20(PV)%20is,the%20PV%20are%20PV%2Dnodes.
+Author: Bruce Moreland 2001
+Last modified: 11/04/02
+"""
+
 class ChessEngine(Evaluator):
     def __init__(self, cutoff: int = 5):
         super().__init__()
         self.cutoff = cutoff
-        self.__tmp_sequence = []
-        self.__best_sequence = [None for _ in range(cutoff)]
         self.__has_mate = False
 
     @cache
@@ -17,19 +29,17 @@ class ChessEngine(Evaluator):
             return True if white else False
         else:
             return False if white else True
-        
+
     def __reset(self):
-        self.__tmp_sequence = []
-        self.__best_sequence = [None for _ in range(self.cutoff)]
         self.__has_mate = False
 
     def run(self, board: chess.Board) -> EvaluatorResponse:
         self.__reset()
-        self.__max_value(board, None, 0, float('-inf'), float('inf'))
+        line = ["" for _ in range(self.cutoff)]
+        self.__max_value(board, None, 0, float('-inf'), float('inf'), line)
         return EvaluatorResponse(self.__has_mate)
 
-
-    def __max_value(self, state: chess.Board, move: chess.Move, depth: int, alpha: int, beta: int) -> Result:
+    def __max_value(self, state: chess.Board, move: chess.Move, depth: int, alpha: int, beta: int, pline: list[str]) -> Result:
         if state.outcome() or depth == self.cutoff:
             # TODO: handle board initial position is mate
             return Result(move, self.__calculate_utility(state, depth))
@@ -46,19 +56,21 @@ class ChessEngine(Evaluator):
         for a in legal_moves:
             state2 = state.copy()
             state2.push(a)
-            self.__tmp_sequence.append(state.san(a))
-            result: Result = self.__min_value(state2, a, depth + 1, alpha, beta)
-            self.__tmp_sequence.pop()
+            line = ["" for _ in range(self.cutoff)]
+            result: Result = self.__min_value(state2, a, depth + 1, alpha, beta, line)
             if result.value > best_move.value:
                 best_move.value = result.value
                 best_move.move = a
+                if best_move.value > alpha:    
+                    pline[0] = best_move.move
+                    for i in range(len(line) - 1):
+                        pline[i + 1] = line[i]
                 alpha = max(best_move.value, alpha)
             if best_move.value >= beta:
                 return best_move
         return best_move
 
-
-    def __min_value(self, state: chess.Board, move: chess.Move, depth: int, alpha: int, beta: int) -> Result:
+    def __min_value(self, state: chess.Board, move: chess.Move, depth: int, alpha: int, beta: int, pline: list[str]) -> Result:
         if state.outcome() or depth == self.cutoff:
             # TODO: handle board initial position is mate
             return Result(move, self.__calculate_utility(state, depth))
@@ -75,25 +87,24 @@ class ChessEngine(Evaluator):
         for a in legal_moves:
             state2 = state.copy()
             state2.push(a)
-            self.__tmp_sequence.append(state.san(a))
-            result: Result = self.__max_value(state2, a, depth + 1, alpha, beta)
-            self.__tmp_sequence.pop()
+            line = ["" for _ in range(self.cutoff)]
+            result: Result = self.__max_value(state2, a, depth + 1, alpha, beta, line)
             if result.value < best_move.value:
                 best_move.value = result.value
                 best_move.move = a
+                if best_move.value < beta:
+                    pline[0] = best_move.move
+                    for i in range(len(line) - 1):
+                        pline[i + 1] = line[i]
                 beta = min(best_move.value, beta)
             if best_move.value <= alpha:
                 return best_move
         return best_move
 
-
     def __calculate_utility(self, state: chess.Board, depth: int) -> int:
         utility: int = 0
         if state.is_checkmate():
             utility = 1 + (self.cutoff - depth)
-            if len(self.__best_sequence) >= len(self.__tmp_sequence) and depth % 2 != 0:
-                self.__best_sequence = self.__tmp_sequence.copy()
-                self.__has_mate = True
         else:
             utility = 0
         # if 0 black has made a move that turned game to checkmate (white is checking for this)
