@@ -45,23 +45,23 @@ class TestChessEnginePly5(unittest.TestCase):
     def test_run_m_simple(self):
         for i in range(len(self.m_simple)-1):
             board = self.m_simple[i]
-            res = self.engine.run(board).has_mate
+            res = self.engine.run(board)
 
             if i == 0:
-                self.assertIsNot(True, res)
+                self.assertIsNot(True, res.has_mate)
             else:
-                self.assertEqual(True, res)
+                self.assertEqual(True, res.has_mate)
 
     def test_run_m2(self):
         for i in range(len(self.m2)-1):
             board = self.m2[i]
-            res = self.engine.run(board).has_mate
+            res = self.engine.run(board)
 
-            self.assertEqual(True, res)
+            self.assertEqual(True, res.has_mate)
 
     def test_run_m3_loaded(self):
         for i in range(len(self.m3_loaded)-1):
             board = self.m3_loaded[i]
-            res = self.engine.run(board).has_mate
+            res = self.engine.run(board)
 
-        self.assertEqual(True, res)
+        self.assertEqual(True, res.has_mate)
