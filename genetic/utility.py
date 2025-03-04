@@ -12,8 +12,6 @@ def chess_board_to_int(board: chess.Board) -> list[int]:
 def chess_int_to_board(board: list[int]) -> chess.Board:
     board_representation = chess.Board("8/8/8/8/8/8/8/8")
 
-    print(list(PIECE_MAP.keys()))
-
     for pos, piece in enumerate(board):
         if piece == 0:
             continue
