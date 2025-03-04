@@ -25,7 +25,7 @@ class FullBoard(Genetic):
                 board = chess_int_to_board(population[i])
                 for _ in range(randint(0, 10)):
                     legal_moves = board.legal_moves
-                    if legal_moves is None:
+                    if legal_moves is None or legal_moves.count() == 0:
                         break
                     board.push(list(legal_moves)[randint(0, legal_moves.count() - 1)])
                 board = chess_board_to_int(board)

@@ -1,4 +1,5 @@
 from common.evaluator import Evaluator
+from multiprocessing import Pool
 
 
 class Genetic:
@@ -18,16 +19,16 @@ class Genetic:
     def _create_population(self, amount: int) -> list[list[int]]:
         raise NotImplementedError()
 
+    # Evaluate chromosome as thread
+    def _evaluation_thread(self, chromosome: list[int]) -> float:
+        return self._fitness(chromosome)
+
     # Return list representing score of individual chromosome from population
     def _evaluate_population(self, population: list[list[int]]) -> list[float]:
-        evaluations = []
-        joint_score = 0.0
-        for chromosome in population:
-            # TODO: Add parallelisation
-            score = self._fitness(chromosome)
-            joint_score += score
-            evaluations.append(score)
-
+        # evaluations = [0.0 for _ in range(len(population))]
+        with Pool(processes=10) as pool:
+            evaluations = pool.map(self._evaluation_thread, population)
+        joint_score = sum(evaluations)
         self.population_evaluations.append(joint_score / len(population))
         return evaluations
 
