@@ -15,7 +15,6 @@ class FullBoard(Genetic):
             return -10
         evaluation: EvaluatorResponse = self.evaluator.run(board)
         if evaluation.has_mate:
-            print("Mate found!")
             return 10
         else:
             return 0
