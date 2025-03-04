@@ -20,13 +20,14 @@ class FullBoard(Genetic):
             return 0
 
     def _mutate(self, population: list[list[int]]) -> list[list[int]]:
-        for i in range(len(population)-1):
+        for i in range(len(population) - 1):
             if randint(0, 100) < 20:
                 board = chess_int_to_board(population[i])
-                for _ in range(randint(1, 10)):
+                for _ in range(randint(0, 10)):
                     legal_moves = board.legal_moves
-                    if legal_moves is not None:
-                        board.push(list(legal_moves)[randint(0, legal_moves.count() - 1)])
+                    if legal_moves is None:
+                        break
+                    board.push(list(legal_moves)[randint(0, legal_moves.count() - 1)])
                 board = chess_board_to_int(board)
                 population[i] = board
 
@@ -54,7 +55,7 @@ class FullBoard(Genetic):
     def _run_tournament(self, population: list[list[int]], evaluations: list[float]) -> list[list[int]]:
         selection = list(zip(population, evaluations))
         selection.sort(key=lambda x: x[1])
-        selection = selection[len(population)//2:]
+        selection = selection[len(population) // 2:]
         selection = list(map(lambda x: x[0], selection))
         return selection
 
@@ -64,8 +65,8 @@ class FullBoard(Genetic):
 
     def _reproduce(self, population: list[list[int]]) -> list[list[int]]:
         offspring = []
-        for i in range(0, len(population)-1, 2):
-            children = self._mate(population[i], population[i+1])
+        for i in range(0, len(population) - 1, 2):
+            children = self._mate(population[i], population[i + 1])
             offspring += children
         if len(population) % 2 != 0:
             children = self._mate(population[0], population[-1])
