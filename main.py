@@ -11,9 +11,9 @@ if __name__ == '__main__':
     engine = ChessEngine(5)
 
     genetic = FullBoard(engine)
-    population, evaluations = genetic.run(5, 20)
+    population = genetic.run(5, 20)
 
-    for i, c in enumerate(population):
-        if evaluations[i - 1] > 0:
-            board = chess_int_to_board(c)
+    for c in population:
+        if c.score > 0:
+            board = chess_int_to_board(c.body)
             print(board.fen())
