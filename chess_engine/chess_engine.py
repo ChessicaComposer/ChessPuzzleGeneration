@@ -40,7 +40,6 @@ class ChessEngine(Evaluator):
             not board.gives_check(m),
             not self.__is_forward(str(m), True)
         ))
-        move = None
         # Do a pre-search to find a mate in one (saves about 2 seconds if a M1 exists)
         for move in legal_moves:
             state2 = board.copy()
