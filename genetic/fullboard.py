@@ -1,5 +1,6 @@
 from .crossover import Crossover
 from .mutation import Mutation
+from .fitness import Fitness
 from .genetic import Genetic
 from common.evaluator import Evaluator, EvaluatorResponse
 from .utility import chess_board_to_int, chess_int_to_board
@@ -7,22 +8,9 @@ from random import randint
 import chess
 from .chromosome import IntBoard
 
-class FullBoard(Genetic, Crossover):
-    def __init__(self, evaluator: Evaluator = None, crossover: Crossover = None, mutation: Mutation = None):
-        super().__init__(evaluator, crossover, mutation)
-
-    def _fitness(self, chromosome: IntBoard) -> IntBoard:
-        if chromosome.evaluated:
-            return chromosome
-        board = chess_int_to_board(chromosome.body)
-        chromosome.set_evaluated(True)
-        if not board.is_valid():
-            chromosome.set_score(-10)
-            return chromosome
-        evaluation: EvaluatorResponse = self.evaluator.run(board)
-        if evaluation.has_mate:
-            chromosome.set_score(10)
-        return chromosome
+class FullBoard(Genetic, Crossover, Fitness):
+    def __init__(self, evaluator: Evaluator = None, crossover: Crossover = None, mutation: Mutation = None, fitness: Fitness = None):
+        super().__init__(evaluator, crossover, mutation, fitness)
 
     # Create population
     def _create_population(self, amount: int) -> list[IntBoard]:

@@ -1,6 +1,7 @@
 from multiprocessing import freeze_support
 
 from chess_engine import ChessEngine
+from genetic.fitnesses.checkmate import Checkmate
 from genetic.utility import chess_int_to_board
 from genetic import FullBoard
 from genetic.crossovers.singlepoint import SinglePoint
@@ -13,7 +14,8 @@ if __name__ == '__main__':
     engine = ChessEngine(5)
     crossover = SinglePoint()
     mutation = RandomForwardMoves()
-    genetic = FullBoard(engine, crossover, mutation)
+    fitness = Checkmate()
+    genetic = FullBoard(engine, crossover, mutation, fitness)
     population = genetic.run(5, 20)
 
     for c in population:
