@@ -4,6 +4,7 @@ from chess_engine import ChessEngine
 from genetic.utility import chess_int_to_board
 from genetic import FullBoard
 from genetic.crossovers.singlepoint import SinglePoint
+from genetic.mutations.random_forward_moves import RandomForwardMoves
 
 if __name__ == '__main__':
     freeze_support()
@@ -11,7 +12,8 @@ if __name__ == '__main__':
     # Test
     engine = ChessEngine(5)
     crossover = SinglePoint()
-    genetic = FullBoard(engine, crossover)
+    mutation = RandomForwardMoves()
+    genetic = FullBoard(engine, crossover, mutation)
     population = genetic.run(5, 20)
 
     for c in population:
