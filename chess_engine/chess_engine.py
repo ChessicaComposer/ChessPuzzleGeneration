@@ -34,7 +34,26 @@ class ChessEngine(Evaluator):
         if not board.is_valid():
             raise ValueError("Invalid chess board")
         line = ["" for _ in range(self.cutoff)]
+        # Sort moves for pre-search
+        legal_moves = list(board.legal_moves)
+        legal_moves = sorted(legal_moves, key=lambda m: (
+            not board.gives_check(m),
+            not self.__is_forward(str(m), True)
+        ))
+        move = None
+        # Do a pre-search to find a mate in one (saves about 2 seconds if a M1 exists)
+        for move in legal_moves:
+            state2 = board.copy()
+            # No checks means no mate in one
+            if not state2.gives_check(move):
+                break
+            state2.push(move)
+            if state2.is_checkmate():
+                board.push(move)
+                return EvaluatorResponse(board.is_checkmate())
+        # If no move is found run minimax
         self.__max_value(board, None, 0, float('-inf'), float('inf'), line)
+            
         line = list(filter(lambda x: x != "", line))
         board_copy = board.copy()
         for move in line:
