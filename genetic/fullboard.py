@@ -1,14 +1,14 @@
+from .crossover import Crossover
 from .genetic import Genetic
 from common.evaluator import Evaluator, EvaluatorResponse
 from .utility import chess_board_to_int, chess_int_to_board
 from random import randint
 import chess
-from .chromosome import IntBoard
+from .chromosome import IntBoard, Chromosome
 
-
-class FullBoard(Genetic):
-    def __init__(self, evaluator: Evaluator = None):
-        super().__init__(evaluator)
+class FullBoard(Genetic, Crossover):
+    def __init__(self, evaluator: Evaluator = None, crossover: Crossover = None):
+        super().__init__(evaluator, crossover)
 
     def _fitness(self, chromosome: IntBoard) -> IntBoard:
         if chromosome.evaluated:
@@ -64,21 +64,6 @@ class FullBoard(Genetic):
         print(list(map(lambda c: c.score, population)))
         population = population[len(population) // 2:]
         return population
-
-    def _mate(self, parent1: IntBoard, parent2: IntBoard) -> list[IntBoard]:
-        half = len(parent1.body) // 2
-        return [IntBoard(parent1.body[:half] + parent2.body[half:]),
-                IntBoard(parent2.body[:half] + parent1.body[half:])]
-
-    def _reproduce(self, population: list[IntBoard]) -> list[IntBoard]:
-        offspring: list[IntBoard] = []
-        for i in range(0, len(population) - 1, 2):
-            children = self._mate(population[i], population[i + 1])
-            offspring += children
-        if len(population) % 2 != 0:
-            children = self._mate(population[0], population[-1])
-            offspring.append(children[0])
-        return offspring
 
     def _stop_condition(self, generation) -> bool:
         return False

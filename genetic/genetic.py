@@ -1,13 +1,14 @@
 from common.evaluator import Evaluator
 from multiprocessing import Pool
 from .chromosome import Chromosome
-
+from .crossover import Crossover
 
 class Genetic:
     # Define parameters
-    def __init__(self, evaluator: Evaluator = None):
+    def __init__(self, evaluator: Evaluator = None, crossover: Crossover = None ):
         self.population_evaluations: list[float] = []  # avg scores per population
         self.evaluator: Evaluator = evaluator
+        self.crossover: Crossover = crossover
 
     # Fitness function
     def _fitness(self, chromosome: Chromosome) -> Chromosome:
@@ -38,7 +39,7 @@ class Genetic:
         raise NotImplementedError()
 
     def _reproduce(self, population: list[Chromosome]) -> list[Chromosome]:
-        raise NotImplementedError()
+        return self.crossover.reproduce(population)
 
     def _stop_condition(self, generation) -> bool:
         raise NotImplementedError()
