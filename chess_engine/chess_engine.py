@@ -34,12 +34,12 @@ class ChessEngine(Evaluator):
         if not board.is_valid():
             raise ValueError("Invalid chess board")
         line = ["" for _ in range(self.cutoff)]
-        self.__max_value(board, None, 0, float('-inf'), float('inf'), line)
+        res = self.__max_value(board, None, 0, float('-inf'), float('inf'), line)
         line = list(filter(lambda x: x != "", line))
         board_copy = board.copy()
         for move in line:
             board_copy.push(move)
-        return EvaluatorResponse(board_copy.is_checkmate())
+        return EvaluatorResponse(board_copy.is_checkmate(), res.value)
 
     def __max_value(self, state: chess.Board, move: chess.Move, depth: int, alpha: int, beta: int,
                     pline: list[str]) -> Result:
@@ -105,12 +105,35 @@ class ChessEngine(Evaluator):
                 return best_move
         return best_move
 
+    # Domain specific chess position evaluation
+    def __evaluate_position(self, board: chess.Board) -> int:
+        evaluation: int = 0
+
+        # Evaluate piece imbalance
+        piece_values = {
+            chess.KING   : 0,
+            chess.PAWN   : 1,
+            chess.KNIGHT : 3,
+            chess.BISHOP : 3,
+            chess.ROOK   : 5,
+            chess.QUEEN  : 9
+        }
+        for square in chess.SQUARES:
+            piece = board.piece_at(square)
+            if piece is not None:
+                if piece.color == chess.WHITE:
+                    evaluation += piece_values[piece.piece_type]
+                else:
+                    evaluation -= piece_values[piece.piece_type]
+        if evaluation < -9 or evaluation > 9:
+            evaluation = -50
+        return evaluation
+
     def __calculate_utility(self, state: chess.Board, depth: int) -> int:
         utility: int = 0
+        utility += self.__evaluate_position(state)
         if state.is_checkmate():
-            utility = 1 + (self.cutoff - depth)
-        else:
-            utility = 0
+            utility = 1000 + (self.cutoff - depth)
         # if 0 black has made a move that turned game to checkmate (white is checking for this)
         if depth % 2 == 0:
             utility *= -1

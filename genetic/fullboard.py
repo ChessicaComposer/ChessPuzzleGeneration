@@ -19,8 +19,7 @@ class FullBoard(Genetic):
             chromosome.set_score(-10)
             return chromosome
         evaluation: EvaluatorResponse = self.evaluator.run(board)
-        if evaluation.has_mate:
-            chromosome.set_score(10)
+        chromosome.set_score(evaluation.utility)
         return chromosome
 
     def _mutate(self, population: list[IntBoard]) -> list[IntBoard]:
