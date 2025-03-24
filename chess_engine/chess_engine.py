@@ -65,10 +65,10 @@ class ChessEngine(Evaluator):
                 best_move.value = result.value
                 best_move.move = a
                 if best_move.value > alpha:
+                    alpha = best_move.value
                     pline[0] = best_move.move
                     for i in range(len(line) - 1):
                         pline[i + 1] = line[i]
-                alpha = max(best_move.value, alpha)
             if best_move.value >= beta:
                 return best_move
         return best_move
@@ -97,10 +97,10 @@ class ChessEngine(Evaluator):
                 best_move.value = result.value
                 best_move.move = a
                 if best_move.value < beta:
+                    beta = best_move.value
                     pline[0] = best_move.move
                     for i in range(len(line) - 1):
                         pline[i + 1] = line[i]
-                beta = min(best_move.value, beta)
             if best_move.value <= alpha:
                 return best_move
         return best_move
@@ -118,23 +118,20 @@ class ChessEngine(Evaluator):
             chess.ROOK   : 5,
             chess.QUEEN  : 9
         }
-        for square in chess.SQUARES:
-            piece = board.piece_at(square)
-            if piece is not None:
-                if piece.color == chess.WHITE:
-                    evaluation += piece_values[piece.piece_type]
-                else:
-                    evaluation -= piece_values[piece.piece_type]
-        if evaluation < -9 or evaluation > 9:
-            evaluation = -50
+        for piece in board.piece_map().values():
+            if piece.color == chess.WHITE:
+                evaluation += piece_values[piece.piece_type]
+            else:
+                evaluation -= piece_values[piece.piece_type]
+
         return evaluation
 
     def __calculate_utility(self, state: chess.Board, depth: int) -> int:
         utility: int = 0
-        utility += self.__evaluate_position(state)
         if state.is_checkmate():
             utility = 1000 + (self.cutoff - depth)
         # if 0 black has made a move that turned game to checkmate (white is checking for this)
         if depth % 2 == 0:
             utility *= -1
+        utility += self.__evaluate_position(state)
         return utility
