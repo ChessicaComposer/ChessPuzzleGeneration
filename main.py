@@ -11,10 +11,10 @@ if __name__ == '__main__':
     freeze_support()
 
     # Test
-    engine = ChessEngine(10)
+    engine = ChessEngine(5)
 
     start = time.time()
-    res = engine.run(Board("r2qkb1r/pp2nppp/3p4/2pNN1B1/2BnP3/3P4/PPP2PPP/R2bK2R w KQkq - 1 1"))
+    res = engine.run(Board("1k6/8/2QK4/8/8/8/8/8 w - - 0 1"))
     end = time.time()
     print(end - start)
 
