@@ -1,3 +1,6 @@
+from .crossover import Crossover
+from .mutation import Mutation
+from .fitness import Fitness
 from .genetic import Genetic
 from common.evaluator import Evaluator, EvaluatorResponse
 from .utility import chess_board_to_int, chess_int_to_board
@@ -5,38 +8,9 @@ from random import randint
 import chess
 from .chromosome import IntBoard
 
-
-class FullBoard(Genetic):
-    def __init__(self, evaluator: Evaluator = None):
-        super().__init__(evaluator)
-
-    def _fitness(self, chromosome: IntBoard) -> IntBoard:
-        if chromosome.evaluated:
-            return chromosome
-        board = chess_int_to_board(chromosome.body)
-        chromosome.set_evaluated(True)
-        if not board.is_valid():
-            chromosome.set_score(-10)
-            return chromosome
-        evaluation: EvaluatorResponse = self.evaluator.run(board)
-        if evaluation.has_mate:
-            chromosome.set_score(10)
-        return chromosome
-
-    def _mutate(self, population: list[IntBoard]) -> list[IntBoard]:
-        for i in range(len(population) - 1):
-            if randint(0, 100) < 20:
-                population[i].set_evaluated(False)
-                board = chess_int_to_board(population[i].body)
-                for _ in range(randint(0, 10)):
-                    legal_moves = board.legal_moves
-                    if legal_moves is None or legal_moves.count() == 0:
-                        break
-                    board.push(list(legal_moves)[randint(0, legal_moves.count() - 1)])
-                board = chess_board_to_int(board)
-                population[i].body = board
-
-        return population
+class FullBoard(Genetic, Crossover, Fitness):
+    def __init__(self, evaluator: Evaluator = None, crossover: Crossover = None, mutation: Mutation = None, fitness: Fitness = None):
+        super().__init__(evaluator, crossover, mutation, fitness)
 
     # Create population
     def _create_population(self, amount: int) -> list[IntBoard]:
@@ -64,21 +38,6 @@ class FullBoard(Genetic):
         print(list(map(lambda c: c.score, population)))
         population = population[len(population) // 2:]
         return population
-
-    def _mate(self, parent1: IntBoard, parent2: IntBoard) -> list[IntBoard]:
-        half = len(parent1.body) // 2
-        return [IntBoard(parent1.body[:half] + parent2.body[half:]),
-                IntBoard(parent2.body[:half] + parent1.body[half:])]
-
-    def _reproduce(self, population: list[IntBoard]) -> list[IntBoard]:
-        offspring: list[IntBoard] = []
-        for i in range(0, len(population) - 1, 2):
-            children = self._mate(population[i], population[i + 1])
-            offspring += children
-        if len(population) % 2 != 0:
-            children = self._mate(population[0], population[-1])
-            offspring.append(children[0])
-        return offspring
 
     def _stop_condition(self, generation) -> bool:
         return False
