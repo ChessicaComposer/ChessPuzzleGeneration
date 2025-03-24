@@ -36,6 +36,7 @@ class ChessEngine(Evaluator):
         line = ["" for _ in range(self.cutoff)]
         res = self.__max_value(board, None, 0, float('-inf'), float('inf'), line)
         line = list(filter(lambda x: x != "", line))
+        print(line)
         board_copy = board.copy()
         for move in line:
             board_copy.push(move)
@@ -51,6 +52,10 @@ class ChessEngine(Evaluator):
         best_score: int = float('-inf')
 
         legal_moves = list(state.legal_moves)
+
+        if len(legal_moves) == 0:
+            return move, self.__calculate_utility(state, depth)
+
         legal_moves = sorted(legal_moves, key=lambda m: (
             not state.is_capture(m),
             not state.gives_check(m),
@@ -84,6 +89,10 @@ class ChessEngine(Evaluator):
         best_score: int = float('inf')
 
         legal_moves = list(state.legal_moves)
+
+        if len(legal_moves) == 0:
+            return move, self.__calculate_utility(state, depth)
+
         legal_moves = sorted(legal_moves, key=lambda m: (
             not state.is_capture(m),
             not state.gives_check(m),
