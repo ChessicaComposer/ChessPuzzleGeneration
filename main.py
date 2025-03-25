@@ -14,7 +14,7 @@ if __name__ == '__main__':
     engine = ChessEngine(5)
 
     start = time.time()
-    res = engine.run(Board("1k6/8/2QK4/8/8/8/8/8 w - - 0 1"))
+    res = engine.run(Board("4kb1r/p2n1ppp/4q3/4p1B1/4P3/1Q6/PPP2PPP/2KR4 w k - 1 0"))
     end = time.time()
     print(end - start)
 
