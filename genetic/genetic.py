@@ -1,3 +1,5 @@
+import time
+
 from common.evaluator import Evaluator
 from multiprocessing import Pool
 from .chromosome import Chromosome
@@ -54,6 +56,7 @@ class Genetic:
 
         # Evaluate cost
         for _ in range(generations):
+            start = time.time()
             print("Generation " + str(generation + 1))
             # Select mate
             parents = self._run_tournament(population)
@@ -70,6 +73,9 @@ class Genetic:
             # Evaluate new generation
             population = self._evaluate_population(population)
             generation += 1
+
+            end = time.time()
+            print(end - start)
 
             # Test
             if self._stop_condition(generation):
