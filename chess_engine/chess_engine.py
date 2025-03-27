@@ -42,14 +42,14 @@ class ChessEngine(Evaluator):
         ))
         # Do a pre-search to find a mate in one (saves about 2 seconds if a M1 exists)
         for move in legal_moves:
-            state2 = board.copy()
             # No checks means no mate in one
-            if not state2.gives_check(move):
+            if not board.gives_check(move):
                 break
-            state2.push(move)
-            if state2.is_checkmate():
-                board.push(move)
+            board.push(move)
+            if board.is_checkmate():
                 return EvaluatorResponse(board.is_checkmate())
+            # Undo move
+            board.pop()
         # If no move is found run minimax
         self.__max_value(board, None, 0, float('-inf'), float('inf'), line)
             
