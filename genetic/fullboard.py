@@ -38,6 +38,3 @@ class FullBoard(Genetic, Crossover, Fitness):
         print(list(map(lambda c: c.score, population)))
         population = population[len(population) // 2:]
         return population
-
-    def _stop_condition(self, generation) -> bool:
-        return False

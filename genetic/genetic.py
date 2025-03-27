@@ -4,6 +4,7 @@ from .chromosome import Chromosome
 from .crossover import Crossover
 from .mutation import Mutation
 from .fitness import Fitness
+import time
 
 class Genetic:
     # Define parameters
@@ -14,6 +15,9 @@ class Genetic:
         self.mutation: Mutation = mutation
         self.fitness: Fitness = fitness
         self.fitness.set_evaluator(evaluator)
+        self.time_limit = 0
+        self.generation_limit = 0
+        self.evaluation_limit = 0
 
     # Fitness function
     def _get_fitness(self, chromosome: Chromosome) -> Chromosome:
@@ -46,10 +50,28 @@ class Genetic:
     def _reproduce(self, population: list[Chromosome]) -> list[Chromosome]:
         return self.crossover.reproduce(population)
 
-    def _stop_condition(self, generation) -> bool:
-        raise NotImplementedError()
-
-    def run(self, generations: int, population_size: int):
+    def _stop_condition(self, conditions: tuple) -> bool:
+        try:
+            if conditions[0] >= self.time_limit:
+                return True
+            if conditions[1] >= self.generation_limit:
+                return True
+            if conditions[2] >= self.evaluation_limit:
+                return True
+        except:
+            print("Stopped because stop-condition is missing")
+            return True
+        return False
+    
+    def run(self, conditions: tuple, population_size: int):
+        # Initialize conditions
+        self.time_limit = conditions[0]
+        self.generation_limit = conditions[1]
+        self.evaluation_limit = conditions[2]
+        
+        # Start time
+        start = time.time()
+        
         # Initialize population
         population = self._create_population(population_size)
 
@@ -57,9 +79,9 @@ class Genetic:
         population = self._evaluate_population(population)
 
         generation = 0
-
+        stop_condition = False
         # Evaluate cost
-        for _ in range(generations):
+        while(not stop_condition):
             print("Generation " + str(generation + 1))
             # Select mate
             parents = self._run_tournament(population)
@@ -77,9 +99,8 @@ class Genetic:
             population = self._evaluate_population(population)
             generation += 1
 
-            # Test
-            if self._stop_condition(generation):
-                break
+            # Check if conditions have been met
+            stop_condition = self._stop_condition((time.time() - start, generation, max(list(map(lambda c: c.score, population)))))
 
         print(self.population_evaluations)
         return population
