@@ -59,7 +59,7 @@ class Genetic:
             if conditions[2] >= self.evaluation_limit:
                 return True
         except:
-            print("Stopped because stop-condition is missing")
+            print("Stop-condition is missing")
             return True
         return False
     
