@@ -6,6 +6,7 @@ from genetic.utility import chess_int_to_board
 from genetic import FullBoard
 from genetic.crossovers.singlepoint import SinglePoint
 from genetic.mutations.random_forward_moves import RandomForwardMoves
+from common.conditions import Conditions
 
 if __name__ == '__main__':
     freeze_support()
@@ -15,8 +16,8 @@ if __name__ == '__main__':
     mutation = RandomForwardMoves()
     fitness = Checkmate()
     genetic = FullBoard(engine, crossover, mutation, fitness)
-    # conditions of form [time_limit,generation_limit, evaluation_limit]
-    conditions = (300, 50, 10)
+    # conditions object with fields time_limit, generation_limit, evaluation_limit
+    conditions = Conditions(None,50,10)
     population = genetic.run(conditions, 20)
 
     for c in population:

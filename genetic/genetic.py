@@ -4,6 +4,7 @@ from .chromosome import Chromosome
 from .crossover import Crossover
 from .mutation import Mutation
 from .fitness import Fitness
+from common.conditions import Conditions
 import time
 
 class Genetic:
@@ -15,9 +16,6 @@ class Genetic:
         self.mutation: Mutation = mutation
         self.fitness: Fitness = fitness
         self.fitness.set_evaluator(evaluator)
-        self.time_limit = 0
-        self.generation_limit = 0
-        self.evaluation_limit = 0
 
     # Fitness function
     def _get_fitness(self, chromosome: Chromosome) -> Chromosome:
@@ -50,24 +48,16 @@ class Genetic:
     def _reproduce(self, population: list[Chromosome]) -> list[Chromosome]:
         return self.crossover.reproduce(population)
 
-    def _stop_condition(self, conditions: tuple) -> bool:
-        try:
-            if conditions[0] >= self.time_limit:
-                return True
-            if conditions[1] >= self.generation_limit:
-                return True
-            if conditions[2] >= self.evaluation_limit:
-                return True
-        except:
-            print("Stop-condition is missing")
+    def _stop_condition(self, current: Conditions, conditions: Conditions) -> bool:
+        if current.time_limit >= conditions.time_limit:
+            return True
+        if current.generation_limit >= conditions.generation_limit:
+            return True
+        if current.evaluation_limit >= conditions.evaluation_limit:
             return True
         return False
     
-    def run(self, conditions: tuple, population_size: int):
-        # Initialize conditions
-        self.time_limit = conditions[0]
-        self.generation_limit = conditions[1]
-        self.evaluation_limit = conditions[2]
+    def run(self, conditions: Conditions, population_size: int):
         
         # Start time
         start = time.time()
@@ -100,7 +90,8 @@ class Genetic:
             generation += 1
 
             # Check if conditions have been met
-            stop_condition = self._stop_condition((time.time() - start, generation, max(list(map(lambda c: c.score, population)))))
+            current_conditions = Conditions(time.time() - start, generation,max(list(map(lambda c: c.score, population))))
+            stop_condition = self._stop_condition(current_conditions, conditions)
 
         print(self.population_evaluations)
         return population
