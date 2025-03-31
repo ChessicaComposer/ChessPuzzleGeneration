@@ -40,11 +40,27 @@ class ChessEngine(Evaluator):
         if not board.is_valid():
             raise ValueError("Invalid chess board")
 
-        # Run negamax with PV-line
+        # Sort moves for pre-search
+        legal_moves = list(board.legal_moves)
+        legal_moves = filter(lambda m: (
+            board.gives_check(m),
+        ), legal_moves)
+        # Do a pre-search to find a mate in one (saves about 2 seconds if a M1 exists)
+        for move in legal_moves:
+            # No checks means no mate in one
+            if not board.gives_check(move):
+                break
+            board.push(move)
+            if board.is_checkmate():
+                return EvaluatorResponse(board.is_checkmate())
+            # Undo move
+            board.pop()
+
+        # If no move is found run negamax
         line = Line([])
         res = self.negamax(board, float('-inf'), float('inf'), self.cutoff, line)
+        print(line.line)
 
-        # Recreate board at final position using moves from PV-line
         board_copy = board.copy()
         for move in line.line:
             board_copy.push(move)
