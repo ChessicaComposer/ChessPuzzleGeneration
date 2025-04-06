@@ -1,4 +1,5 @@
 import chess
+import chess.polyglot
 from .result import Result
 from functools import cache
 from common.evaluator import Evaluator, EvaluatorResponse
@@ -22,12 +23,21 @@ class Line:
     def __init__(self, line: list[chess.Move]):
         self.line = line
 
+class ttEntry:
+    def __init__(self, score, alpha, beta, depth, node_type):
+        self.score = score
+        self.alpha = alpha
+        self.beta = beta
+        self.depth = depth
+        self.type = node_type
+        self.valid = True
 
 class ChessEngine(Evaluator):
     def __init__(self, cutoff: int = 5):
         super().__init__()
         self.cutoff = cutoff
         self.count = 0
+        self.transposition_table = {}
 
     @cache
     def __is_forward(self, move: str, white: bool) -> bool:
@@ -69,8 +79,31 @@ class ChessEngine(Evaluator):
 
 
     def negamax(self, state: chess.Board, alpha: int, beta: int, depth: int, pline: Line) -> int:
+        # Save the initial alpha value to use determine the transposition table entry node type (beta is not needed to be stored as it does not get updated in negamax)
+        alphaOrig = alpha
         line: Line = Line([])
 
+        # The transposition table is based roughly on the pseudocode in the following wiki: https://en.m.wikipedia.org/wiki/Negamax
+        ## Check if state is in Transposition table
+        hash_value = chess.polyglot.zobrist_hash(state)
+        if hash_value in self.transposition_table:
+            entry = self.transposition_table.get(hash_value)
+        else:
+            # Set invalid entry
+            entry = ttEntry(0,0,0,0,0)
+            entry.valid = False
+
+        if entry.depth >= depth and entry.valid:
+            if entry.type == 0:
+                beta = min(beta, entry.beta)
+            if entry.type == 1:
+                alpha = max(alpha, entry.alpha)
+            if entry.type == 2:
+                return entry.score
+            
+            if alpha >= beta:
+                return entry.score
+                
         # If at max depth 0, calculate utility
         if depth == 0:
             return self.__calculate_utility(state, depth)
@@ -100,6 +133,21 @@ class ChessEngine(Evaluator):
                     pline.line = [a] + line.line
             if score >= beta:
                 return best_value
+    
+        
+        # Set node_type to an invalid value by default
+        node_type = 3
+        if best_value <= alphaOrig:
+            # Set node type to All-node (Upper bound) (we call this 0)
+            node_type = 0
+        if best_value >= beta:
+            # Set node type to Cut-node (Lower bound) (we call this 1)
+            node_type = 1
+        if alphaOrig < best_value < beta:
+            # Set node type to PV (EXACT) (we call this 2)
+            node_type = 2  
+        entry = ttEntry(best_value, alpha, beta, depth, node_type)
+        self.transposition_table[hash_value] = entry
         return best_value
 
     # Domain specific chess position evaluation
