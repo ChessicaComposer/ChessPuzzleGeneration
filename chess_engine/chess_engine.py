@@ -94,11 +94,14 @@ class ChessEngine(Evaluator):
             entry.valid = False
 
         if entry.depth >= depth and entry.valid:
+            # ALL-NODE
             if entry.type == 0:
-                beta = min(beta, entry.beta)
-            if entry.type == 1:
-                alpha = max(alpha, entry.alpha)
-            if entry.type == 2:
+                beta = min(beta, entry.score)
+            # CUT-NODE
+            elif entry.type == 1:
+                alpha = max(alpha, entry.score)
+            # PV-NODE
+            elif entry.type == 2:
                 return entry.score
             
             if alpha >= beta:
@@ -135,15 +138,13 @@ class ChessEngine(Evaluator):
                 return best_value
     
         
-        # Set node_type to an invalid value by default
-        node_type = 3
         if best_value <= alphaOrig:
             # Set node type to All-node (Upper bound) (we call this 0)
             node_type = 0
-        if best_value >= beta:
+        elif best_value >= beta:
             # Set node type to Cut-node (Lower bound) (we call this 1)
             node_type = 1
-        if alphaOrig < best_value < beta:
+        else:  #alphaOrig < best_value < beta 
             # Set node type to PV (EXACT) (we call this 2)
             node_type = 2  
         entry = ttEntry(best_value, alpha, beta, depth, node_type)
