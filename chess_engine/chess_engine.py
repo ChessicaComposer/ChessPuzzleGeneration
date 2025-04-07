@@ -24,10 +24,8 @@ class Line:
         self.line = line
 
 class ttEntry:
-    def __init__(self, score, alpha, beta, depth, node_type):
+    def __init__(self, score, depth, node_type):
         self.score = score
-        self.alpha = alpha
-        self.beta = beta
         self.depth = depth
         self.type = node_type
         self.valid = True
@@ -69,6 +67,7 @@ class ChessEngine(Evaluator):
         # If no move is found run negamax
         line = Line([])
         res = self.negamax(board, float('-inf'), float('inf'), self.cutoff, line)
+        
         print(line.line)
 
         board_copy = board.copy()
@@ -86,11 +85,12 @@ class ChessEngine(Evaluator):
         # The transposition table is based roughly on the pseudocode in the following wiki: https://en.m.wikipedia.org/wiki/Negamax
         ## Check if state is in Transposition table
         hash_value = chess.polyglot.zobrist_hash(state)
+
         if hash_value in self.transposition_table:
             entry = self.transposition_table.get(hash_value)
         else:
             # Set invalid entry
-            entry = ttEntry(0,0,0,0,0)
+            entry = ttEntry(0,0,0)
             entry.valid = False
 
         if entry.depth >= depth and entry.valid:
@@ -106,7 +106,7 @@ class ChessEngine(Evaluator):
             
             if alpha >= beta:
                 return entry.score
-                
+
         # If at max depth 0, calculate utility
         if depth == 0:
             return self.__calculate_utility(state, depth)
@@ -147,7 +147,7 @@ class ChessEngine(Evaluator):
         else:  #alphaOrig < best_value < beta 
             # Set node type to PV (EXACT) (we call this 2)
             node_type = 2  
-        entry = ttEntry(best_value, alpha, beta, depth, node_type)
+        entry = ttEntry(best_value, depth, node_type)
         self.transposition_table[hash_value] = entry
         return best_value
 
