@@ -24,12 +24,11 @@ class Line:
         self.line = line
 
 class ttEntry:
-    def __init__(self, score, depth, node_type, move):
+    def __init__(self, score, depth, node_type):
         self.score = score
         self.depth = depth
         self.type = node_type
         self.valid = True
-        self.move = move
 
 class ChessEngine(Evaluator):
     def __init__(self, cutoff: int = 5):
@@ -89,7 +88,7 @@ class ChessEngine(Evaluator):
             entry = self.transposition_table.get(hash_value)
         else:
             # Set invalid entry
-            entry = ttEntry(0,0,0, None)
+            entry = ttEntry(0,0,0)
             entry.valid = False
 
         if entry.depth >= depth and entry.valid:
@@ -101,9 +100,11 @@ class ChessEngine(Evaluator):
                 alpha = max(alpha, entry.score)
             # PV-NODE
             elif entry.type == 2:
+                #pline.line = entry.moves
                 return entry.score
             
             if alpha >= beta:
+                #pline.line = entry.moves
                 return entry.score
 
         # If at max depth 0, calculate utility
@@ -123,7 +124,6 @@ class ChessEngine(Evaluator):
         if len(legal_moves) == 0:
             pline.line = []
             return self.__calculate_utility(state, depth)
-        best_move = None
         for a in legal_moves:
             state.push(a)
             score = -self.negamax(state, -beta, -alpha, depth - 1, line)
@@ -133,7 +133,6 @@ class ChessEngine(Evaluator):
                 if score > alpha:
                     alpha = score
                     pline.line = [a] + line.line
-                    best_move = a
             if score >= beta:
                 break
     
@@ -147,7 +146,8 @@ class ChessEngine(Evaluator):
         else:  #alphaOrig < best_value < beta 
             # Set node type to PV (EXACT) (we call this 2)
             node_type = 2  
-        entry = ttEntry(best_value, depth, node_type, best_move)
+        #if best_move is not None:
+        entry = ttEntry(best_value, depth - 1, node_type)
         self.transposition_table[hash_value] = entry
         return best_value
 
