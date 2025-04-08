@@ -2,6 +2,7 @@ import chess
 from .result import Result
 from functools import cache
 from common.evaluator import Evaluator, EvaluatorResponse
+from .utility import evaluate_position, evaluate_move_stack, PIECE_VALUES
 
 """
 Sources
@@ -28,6 +29,9 @@ class ChessEngine(Evaluator):
         super().__init__()
         self.cutoff = cutoff
         self.count = 0
+        self.initial_board = None
+        self.initial_eval = 0
+        self.moves = [None for _ in range(cutoff)]
 
     @cache
     def __is_forward(self, move: str, white: bool) -> bool:
@@ -39,6 +43,8 @@ class ChessEngine(Evaluator):
     def run(self, board: chess.Board) -> EvaluatorResponse:
         if not board.is_valid():
             raise ValueError("Invalid chess board")
+
+        self.initial_board = board.copy()
 
         # Sort moves for pre-search
         legal_moves = list(board.legal_moves)
@@ -57,6 +63,8 @@ class ChessEngine(Evaluator):
             board.pop()
 
         # If no move is found run negamax
+        self.initial_eval = evaluate_position(board)
+
         line = Line([])
         res = self.negamax(board, float('-inf'), float('inf'), self.cutoff, line)
         print(line.line)
@@ -90,6 +98,7 @@ class ChessEngine(Evaluator):
             return self.__calculate_utility(state, depth)
 
         for a in legal_moves:
+            self.moves[depth-1] = state.piece_at(a.to_square)
             state.push(a)
             score = -self.negamax(state, -beta, -alpha, depth - 1, line)
             state.pop()
@@ -102,33 +111,16 @@ class ChessEngine(Evaluator):
                 return best_value
         return best_value
 
-    # Domain specific chess position evaluation
-    def __evaluate_position(self, board: chess.Board) -> int:
-        evaluation: int = 0
-
-        # Evaluate piece imbalance
-        piece_values = {
-            chess.KING   : 0,
-            chess.PAWN   : 1,
-            chess.KNIGHT : 3,
-            chess.BISHOP : 3,
-            chess.ROOK   : 5,
-            chess.QUEEN  : 9
-        }
-        white = 0
-        black = 0
-        for piece in board.piece_map().items():
-            p = piece[1]
-            if p.color == chess.WHITE:
-                evaluation += piece_values[p.piece_type]
-            else:
-                evaluation -= piece_values[p.piece_type]
-
-        return evaluation + (white - black)
-
     def __calculate_utility(self, state: chess.Board, depth: int) -> int:
         # Utility must indicate a negative score, representing the badness of a position
         # for the given player
         if state.is_checkmate():
             return -(100000 + depth)
-        return self.__evaluate_position(state) * (-1 if state.turn else 1)
+        #return evaluate_position(state) * (-1 if state.turn else 1)
+        evaluation = 0
+
+        for piece in self.moves:
+            if not piece:
+                continue
+            evaluation += PIECE_VALUES[piece.piece_type] * (-1 if piece.color == chess.WHITE else 1)
+        return evaluation + self.initial_eval * (-1 if state.turn else 1)
