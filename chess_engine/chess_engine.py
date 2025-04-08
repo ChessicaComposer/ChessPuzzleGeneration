@@ -24,11 +24,12 @@ class Line:
         self.line = line
 
 class ttEntry:
-    def __init__(self, score, depth, node_type):
+    def __init__(self, score, depth, node_type, best_move):
         self.score = score
         self.depth = depth
         self.type = node_type
         self.valid = True
+        self.move = best_move
 
 class ChessEngine(Evaluator):
     def __init__(self, cutoff: int = 5):
@@ -65,20 +66,16 @@ class ChessEngine(Evaluator):
             board.pop()
 
         # If no move is found run negamax
-        line = Line([])
-        res = self.negamax(board, float('-inf'), float('inf'), self.cutoff, line)
-        print(line.line)
-        board_copy = board.copy()
-        for move in line.line:
-            board_copy.push(move)
+        res = self.negamax(board, float('-inf'), float('inf'), self.cutoff)
+        pv_line = self.__get_pvline(board)
+        print(pv_line)
 
-        return EvaluatorResponse(board_copy.is_checkmate(), res)
+        return EvaluatorResponse(True, res)
 
 
-    def negamax(self, state: chess.Board, alpha: int, beta: int, depth: int, pline: Line) -> int:
+    def negamax(self, state: chess.Board, alpha: int, beta: int, depth: int) -> int:
         # Save the initial alpha value to use determine the transposition table entry node type (beta is not needed to be stored as it does not get updated in negamax)
         alphaOrig = alpha
-        line: Line = Line([])
 
         # The transposition table is based roughly on the pseudocode in the following wiki: https://en.m.wikipedia.org/wiki/Negamax
         ## Check if state is in Transposition table
@@ -88,7 +85,7 @@ class ChessEngine(Evaluator):
             entry = self.transposition_table.get(hash_value)
         else:
             # Set invalid entry
-            entry = ttEntry(0,0,0)
+            entry = ttEntry(0,0,0, None)
             entry.valid = False
 
         if entry.depth >= depth and entry.valid:
@@ -100,11 +97,9 @@ class ChessEngine(Evaluator):
                 alpha = max(alpha, entry.score)
             # PV-NODE
             elif entry.type == 2:
-                #pline.line = entry.moves
                 return entry.score
             
             if alpha >= beta:
-                #pline.line = entry.moves
                 return entry.score
 
         # If at max depth 0, calculate utility
@@ -122,17 +117,17 @@ class ChessEngine(Evaluator):
 
         # Check if potential checkmate
         if len(legal_moves) == 0:
-            pline.line = []
             return self.__calculate_utility(state, depth)
+        best_move = None
         for a in legal_moves:
             state.push(a)
-            score = -self.negamax(state, -beta, -alpha, depth - 1, line)
+            score = -self.negamax(state, -beta, -alpha, depth - 1)
             state.pop()
             if score > best_value:
                 best_value = score
+                best_move = a
                 if score > alpha:
                     alpha = score
-                    pline.line = [a] + line.line
             if score >= beta:
                 break
     
@@ -147,7 +142,7 @@ class ChessEngine(Evaluator):
             # Set node type to PV (EXACT) (we call this 2)
             node_type = 2  
         #if best_move is not None:
-        entry = ttEntry(best_value, depth - 1, node_type)
+        entry = ttEntry(best_value, depth - 1, node_type, best_move)
         self.transposition_table[hash_value] = entry
         return best_value
 
@@ -181,3 +176,15 @@ class ChessEngine(Evaluator):
         if state.is_checkmate():
             return -(100000 + depth)
         return self.__evaluate_position(state) * (-1 if state.turn else 1)
+
+    def __get_pvline(self, board: chess.Board) -> list[chess.Move]:
+        board_copy = board.copy()
+        pv = []
+        for _ in range(self.cutoff):
+            hash_value = chess.polyglot.zobrist_hash(board_copy)
+            entry = self.transposition_table.get(hash_value)
+            if entry is None or entry.move is None:
+                break
+            pv.append(entry.move)
+            board_copy.push(entry.move)
+        return pv
