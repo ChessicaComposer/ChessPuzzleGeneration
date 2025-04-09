@@ -1,4 +1,4 @@
-from genetic.mutation.mutation import Mutation
+from genetic.mutation.base import Mutation
 from random import randint
 from ..utility import chess_board_to_int, chess_int_to_board
 from .. chromosome import IntBoard

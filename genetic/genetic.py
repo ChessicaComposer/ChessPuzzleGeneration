@@ -2,13 +2,22 @@ from common.evaluator import Evaluator
 from multiprocessing import Pool
 from .chromosome import Chromosome
 from genetic.crossover.base import Crossover
-from genetic.mutation.mutation import Mutation
-from .fitness import Fitness
+from genetic.mutation.base import Mutation
+from .fitness.base import Fitness
+from .population.base import Population
+from .tournament.base import Tournament
+
 
 class Genetic:
     # Define parameters
-    def __init__(self, evaluator: Evaluator = None, crossover: Crossover = None, mutation: Mutation = None,
-                 fitness: Fitness = None, max_fitness: float = 10):
+    def __init__(self,
+                 evaluator: Evaluator = None,
+                 crossover: Crossover = None,
+                 mutation: Mutation = None,
+                 fitness: Fitness = None,
+                 population: Population = None,
+                 tournament: Tournament = None,
+                 max_fitness: float = 10):
         self.population_evaluations: list[float] = []  # avg scores per population
         self.elevated_individuals: list[Chromosome] = []
         self.max_fitness: float = max_fitness
@@ -16,22 +25,13 @@ class Genetic:
         self.crossover: Crossover = crossover
         self.mutation: Mutation = mutation
         self.fitness: Fitness = fitness
+        self.population: Population = population
+        self.tournament: Tournament = tournament
         self.fitness.set_evaluator(evaluator)
-
-    # Fitness function
-    def _get_fitness(self, chromosome: Chromosome) -> Chromosome:
-        return self.fitness.score(chromosome)
-
-    def _mutate(self, population: list[Chromosome]) -> list[Chromosome]:
-        return self.mutation.mutate(population)
-
-    # Create population
-    def _create_population(self, amount: int) -> list[Chromosome]:
-        raise NotImplementedError()
 
     # Evaluate chromosome as thread
     def _evaluation_thread(self, chromosome: Chromosome) -> Chromosome:
-        return self._get_fitness(chromosome)
+        return self.fitness.score(chromosome)
 
     # Return list representing score of individual chromosome from population
     def _evaluate_population(self, population: list[Chromosome]) -> list[Chromosome]:
@@ -50,23 +50,17 @@ class Genetic:
                 self.elevated_individuals.append(chromosome)
 
                 # Generate replacement
-                replacement = self._create_population(1)[0]
+                replacement = self.population.create(1)[0]
                 population[i] = replacement
 
         return population
-
-    def _run_tournament(self, population: list[Chromosome]) -> list[Chromosome]:
-        raise NotImplementedError()
-
-    def _reproduce(self, population: list[Chromosome]) -> list[Chromosome]:
-        return self.crossover.reproduce(population)
 
     def _stop_condition(self, generation) -> bool:
         raise NotImplementedError()
 
     def run(self, generations: int, population_size: int):
         # Initialize population
-        population = self._create_population(population_size)
+        population = self.population.create(population_size)
 
         # Initial evaluation
         population = self._evaluate_population(population)
@@ -77,13 +71,13 @@ class Genetic:
         for _ in range(generations):
             print("Generation " + str(generation + 1))
             # Select mate
-            parents = self._run_tournament(population)
+            parents = self.tournament.run(population)
 
             # Reproduce
-            children = self._reproduce(parents)
+            children = self.crossover.reproduce(parents)
 
             # Mutate
-            children = self._mutate(children)
+            children = self.mutation.mutate(children)
 
             # Update population
             population = parents + children

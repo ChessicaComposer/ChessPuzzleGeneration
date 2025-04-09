@@ -1,4 +1,4 @@
-from genetic.mutation.mutation import Mutation
+from genetic.mutation.base import Mutation
 from random import randint
 from ..constants import PIECE_MAP
 from ..chromosome import IntBoard

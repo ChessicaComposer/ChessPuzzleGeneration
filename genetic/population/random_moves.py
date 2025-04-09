@@ -5,7 +5,7 @@ from ..utility import chess_board_to_int
 from random import randint
 
 class RandomMoves(Population):
-    def get_population(self, amount: int) -> list[IntBoard]:
+    def create(self, amount: int) -> list[IntBoard]:
         moves = 48
         boards = [chess.Board() for _ in range(amount)]
         population: list[IntBoard] = []

@@ -1,29 +1,12 @@
 from multiprocessing import freeze_support
-
-from chess import Board
-
-from chess_engine import ChessEngine
-from genetic.fitness import checkmate, utility
+from genetic import Composer
 from genetic.utility import chess_int_to_board
-from genetic import FullBoard, Composer
-from genetic.crossover.singlepoint import SinglePoint
-from genetic.mutation import random_forward_moves, add_random_piece
 
 if __name__ == '__main__':
     freeze_support()
+    genetic = Composer(5)
+    result = genetic.run(40, 30)
 
-    engine = ChessEngine(5)
-
-    # Testing composer
-    max_fitness = 10.0
-    crossover = SinglePoint()
-    mutation = add_random_piece.AddRandomPieces()
-    fitness = checkmate.Checkmate()
-    genetic = Composer(engine, crossover, mutation, fitness, max_fitness)
-
-    population = genetic.run(40, 30)
-
-    for c in population:
-        if c.score > 0:
-            board = chess_int_to_board(c.body)
-            print(board.fen())
+    for c in result:
+        board = chess_int_to_board(c.body)
+        print(board.fen())

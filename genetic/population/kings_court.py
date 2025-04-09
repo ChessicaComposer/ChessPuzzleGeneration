@@ -6,7 +6,7 @@ from ..chromosome import IntBoard
 from ..utility import chess_board_to_int
 
 class KingsCourt(Population):
-    def get_population(self, amount: int) -> list[IntBoard]:
+    def create(self, amount: int) -> list[IntBoard]:
         boards = [chess.Board("8/8/8/8/8/8/8/8 w HAha - 0 1") for _ in range(amount)]
         population: list[IntBoard] = []
 

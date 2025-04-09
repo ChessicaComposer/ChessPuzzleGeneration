@@ -1,9 +1,6 @@
-from genetic.chromosome import IntBoard
+from genetic.chromosome import Chromosome
 
 
 class Tournament:
-    def __init__(self, population: list[IntBoard]):
-        self.population = population
-
-    def run_tournament(self, population: list[IntBoard]) -> list[IntBoard]:
+    def run(self, population: list[Chromosome]) -> list[Chromosome]:
         raise NotImplementedError()
