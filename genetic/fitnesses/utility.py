@@ -16,5 +16,5 @@ class Utility(Fitness):
             chromosome.set_score(-10)
             return chromosome
         evaluation: EvaluatorResponse = self.evaluator.run(board)
-        chromosome.set_score(evaluation.utility)
+        chromosome.set_score(evaluation.utility * -1)
         return chromosome
