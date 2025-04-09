@@ -6,6 +6,6 @@ class Checkmate(Fitness):
         super().__init__()
 
     def _evaluate_fitness(self, evaluation: EvaluatorResponse) -> float:
-        if evaluation.has_mate:
+        if evaluation.has_mate and evaluation.utility > 0:
             return 10
         return 0
