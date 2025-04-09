@@ -9,8 +9,9 @@ import chess
 from .chromosome import IntBoard
 
 class FullBoard(Genetic, Crossover, Fitness):
-    def __init__(self, evaluator: Evaluator = None, crossover: Crossover = None, mutation: Mutation = None, fitness: Fitness = None):
-        super().__init__(evaluator, crossover, mutation, fitness)
+    def __init__(self, evaluator: Evaluator = None, crossover: Crossover = None, mutation: Mutation = None,
+                 fitness: Fitness = None, max_fitness: float = 10.0):
+        super().__init__(evaluator, crossover, mutation, fitness, max_fitness)
 
     # Create population
     def _create_population(self, amount: int) -> list[IntBoard]:
