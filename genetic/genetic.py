@@ -7,8 +7,11 @@ from .fitness import Fitness
 
 class Genetic:
     # Define parameters
-    def __init__(self, evaluator: Evaluator = None, crossover: Crossover = None, mutation: Mutation = None, fitness: Fitness = None):
+    def __init__(self, evaluator: Evaluator = None, crossover: Crossover = None, mutation: Mutation = None,
+                 fitness: Fitness = None, max_fitness: float = 10):
         self.population_evaluations: list[float] = []  # avg scores per population
+        self.elevated_individuals: list[Chromosome] = []
+        self.max_fitness: float = max_fitness
         self.evaluator: Evaluator = evaluator
         self.crossover: Crossover = crossover
         self.mutation: Mutation = mutation
@@ -35,9 +38,21 @@ class Genetic:
         # evaluations = [0.0 for _ in range(len(population))]
         with Pool(processes=10) as pool:
             population = pool.map(self._evaluation_thread, population)
+
+        # Store scoring before extraction to keep track of successful generations
         scores = list(map(lambda c: c.score, population))
         joint_score = sum(scores)
         self.population_evaluations.append(joint_score / len(population))
+
+        # Extract "perfect" individuals
+        for i, chromosome in enumerate(population):
+            if chromosome.score >= self.max_fitness:
+                self.elevated_individuals.append(chromosome)
+
+                # Generate replacement
+                replacement = self._create_population(1)[0]
+                population[i] = replacement
+
         return population
 
     def _run_tournament(self, population: list[Chromosome]) -> list[Chromosome]:
@@ -82,4 +97,4 @@ class Genetic:
                 break
 
         print(self.population_evaluations)
-        return population
+        return self.elevated_individuals

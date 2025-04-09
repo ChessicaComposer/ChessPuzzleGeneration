@@ -59,7 +59,7 @@ class ChessEngine(Evaluator):
         # If no move is found run negamax
         line = Line([])
         res = self.negamax(board, float('-inf'), float('inf'), self.cutoff, line)
-        print(line.line)
+        # print(line.line)
 
         board_copy = board.copy()
         for move in line.line:
