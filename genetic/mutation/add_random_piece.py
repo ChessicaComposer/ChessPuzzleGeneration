@@ -34,3 +34,5 @@ class AddRandomPieces(Mutation):
 
         board[random_position] = random_piece
         return board
+
+    #def _make_random_moves(self):
