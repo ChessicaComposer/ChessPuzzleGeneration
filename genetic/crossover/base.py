@@ -1,4 +1,4 @@
-from .chromosome import Chromosome
+from genetic.chromosome import Chromosome
 
 class Crossover:
     def __init__(self):

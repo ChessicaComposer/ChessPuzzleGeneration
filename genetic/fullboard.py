@@ -1,38 +1,16 @@
-from .crossover import Crossover
-from .mutation import Mutation
+from genetic.crossover.base import Crossover
+from genetic.mutation.mutation import Mutation
 from .fitness import Fitness
 from .genetic import Genetic
-from common.evaluator import Evaluator, EvaluatorResponse
-from .utility import chess_board_to_int, chess_int_to_board
-from random import randint
-import chess
+from common.evaluator import Evaluator
 from .chromosome import IntBoard
 
-class FullBoard(Genetic, Crossover, Fitness):
+class FullBoard(Genetic):
     def __init__(self, evaluator: Evaluator = None, crossover: Crossover = None, mutation: Mutation = None,
                  fitness: Fitness = None, max_fitness: float = 10.0):
         super().__init__(evaluator, crossover, mutation, fitness, max_fitness)
 
     # Create population
-    def _create_population(self, amount: int) -> list[IntBoard]:
-        moves = 48
-        boards = [chess.Board() for _ in range(amount)]
-        population: list[IntBoard] = []
-
-        for board in boards:
-            for _ in range(moves):
-                legal_moves = board.legal_moves
-                if legal_moves.count() == 0:
-                    break
-                board.push(list(legal_moves)[randint(0, legal_moves.count() - 1)])
-
-            board_int = chess_board_to_int(board)
-
-            chromosome = IntBoard(board_int)
-
-            population.append(chromosome)
-
-        return population
 
     def _run_tournament(self, population: list[IntBoard]) -> list[IntBoard]:
         population.sort(key=lambda c: c.score)

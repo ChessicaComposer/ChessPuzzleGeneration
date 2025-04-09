@@ -1,5 +1,5 @@
 from common import Evaluator
-from .chromosome import Chromosome
+from ..chromosome import Chromosome
 
 class Fitness(Evaluator):
     def __init__(self):

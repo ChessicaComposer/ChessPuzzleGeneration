@@ -1,5 +1,5 @@
 from common.evaluator import EvaluatorResponse
-from ..fitness import Fitness
+from base import Fitness
 from ..utility import chess_board_to_int, chess_int_to_board
 from .. chromosome import IntBoard
 
@@ -16,5 +16,5 @@ class Utility(Fitness):
             chromosome.set_score(-10)
             return chromosome
         evaluation: EvaluatorResponse = self.evaluator.run(board)
-        chromosome.set_score(evaluation.utility * -1)
+        chromosome.set_score(evaluation.utility)
         return chromosome

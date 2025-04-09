@@ -1,4 +1,4 @@
-from ..mutation import Mutation
+from genetic.mutation.mutation import Mutation
 from random import randint
 from ..constants import PIECE_MAP
 from ..chromosome import IntBoard
@@ -19,10 +19,10 @@ class AddRandomPieces(Mutation):
         return population
 
     def _add_random_piece(self, board: list[int]) -> list[int]:
-        random_piece = randint(1, len(PIECE_MAP.keys()))
-
         if not 0 in board:
             return board
+
+        random_piece = randint(1, len(PIECE_MAP.keys()))
 
         # Generate a random piece until not invalid or a king
         while random_piece in [9, 10]:

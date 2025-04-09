@@ -1,8 +1,8 @@
 from common.evaluator import Evaluator
 from multiprocessing import Pool
 from .chromosome import Chromosome
-from .crossover import Crossover
-from .mutation import Mutation
+from genetic.crossover.base import Crossover
+from genetic.mutation.mutation import Mutation
 from .fitness import Fitness
 
 class Genetic:

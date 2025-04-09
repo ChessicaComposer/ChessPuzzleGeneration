@@ -1,5 +1,5 @@
 from common.evaluator import EvaluatorResponse
-from ..fitness import Fitness
+from base import Fitness
 from ..utility import chess_board_to_int, chess_int_to_board
 from .. chromosome import IntBoard
 

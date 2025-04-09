@@ -1,4 +1,4 @@
-from .. crossover import Crossover
+from genetic.crossover.base import Crossover
 from .. chromosome import IntBoard
 
 class SinglePoint(Crossover):
