@@ -142,7 +142,7 @@ class ChessEngine(Evaluator):
             # Set node type to PV (EXACT) (we call this 2)
             node_type = 2  
         #if best_move is not None:
-        entry = ttEntry(best_value, depth - 1, node_type, best_move)
+        entry = ttEntry(best_value, depth, node_type, best_move)
         self.transposition_table[hash_value] = entry
         return best_value
 
