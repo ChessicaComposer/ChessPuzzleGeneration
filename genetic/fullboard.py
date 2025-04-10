@@ -15,6 +15,3 @@ class FullBoard(Genetic):
             population = RandomMoves(),
             max_fitness = 10.0
         )
-
-    def _stop_condition(self, generation) -> bool:
-        return False

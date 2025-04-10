@@ -18,6 +18,3 @@ class Composer(Genetic):
             tournament = SortedAscending(),
             max_fitness = 10.0
         )
-
-    def _stop_condition(self, generation) -> bool:
-        return False

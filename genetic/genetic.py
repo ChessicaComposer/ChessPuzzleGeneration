@@ -6,7 +6,8 @@ from genetic.mutation.base import Mutation
 from .fitness.base import Fitness
 from .population.base import Population
 from .tournament.base import Tournament
-
+from common.conditions import Conditions
+import time
 
 class Genetic:
     # Define parameters
@@ -55,10 +56,19 @@ class Genetic:
 
         return population
 
-    def _stop_condition(self, generation) -> bool:
-        raise NotImplementedError()
-
-    def run(self, generations: int, population_size: int):
+    def _stop_condition(self, current: Conditions, conditions: Conditions) -> bool:
+        if current.time_limit >= conditions.time_limit:
+            return True
+        if current.generation_limit >= conditions.generation_limit:
+            return True
+        if current.evaluation_limit >= conditions.evaluation_limit:
+            return True
+        return False
+    
+    def run(self, population_size: int, conditions: Conditions):
+        # Start time
+        start = time.time()
+        
         # Initialize population
         population = self.population.create(population_size)
 
@@ -66,9 +76,9 @@ class Genetic:
         population = self._evaluate_population(population)
 
         generation = 0
-
+        stop_condition = False
         # Evaluate cost
-        for _ in range(generations):
+        while(not stop_condition):
             print("Generation " + str(generation + 1))
             # Select mate
             parents = self.tournament.run(population)
@@ -86,9 +96,9 @@ class Genetic:
             population = self._evaluate_population(population)
             generation += 1
 
-            # Test
-            if self._stop_condition(generation):
-                break
+            # Check if conditions have been met
+            current_conditions = Conditions(time.time() - start, generation,max(list(map(lambda c: c.score, population))))
+            stop_condition = self._stop_condition(current_conditions, conditions)
 
         print(self.population_evaluations)
         return self.elevated_individuals
