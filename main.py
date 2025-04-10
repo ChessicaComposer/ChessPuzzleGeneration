@@ -6,8 +6,9 @@ from genetic.utility import chess_int_to_board
 if __name__ == '__main__':
     freeze_support()
     genetic = Composer(5)
+    # Conditions of the form: Time, Generation, Evaluation limit
     conditions = Conditions(None,50,10)
-    result = genetic.run(40, 30)
+    result = genetic.run(30, conditions)
 
     for c in result:
         board = chess_int_to_board(c.body)

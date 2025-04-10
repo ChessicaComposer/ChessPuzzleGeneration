@@ -70,7 +70,6 @@ class Genetic:
         return False
     
     def run(self, conditions: Conditions, population_size: int):
-        
         # Start time
         start = time.time()
         
