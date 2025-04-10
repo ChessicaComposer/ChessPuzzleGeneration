@@ -18,10 +18,16 @@ Last modified: 11/04/02
 """
 
 
+class Line:
+    def __init__(self, line: list[chess.Move]):
+        self.line = line
+
+
 class ChessEngine(Evaluator):
     def __init__(self, cutoff: int = 5):
         super().__init__()
         self.cutoff = cutoff
+        self.count = 0
 
     @cache
     def __is_forward(self, move: str, white: bool) -> bool:
@@ -33,13 +39,12 @@ class ChessEngine(Evaluator):
     def run(self, board: chess.Board) -> EvaluatorResponse:
         if not board.is_valid():
             raise ValueError("Invalid chess board")
-        line = ["" for _ in range(self.cutoff)]
+
         # Sort moves for pre-search
         legal_moves = list(board.legal_moves)
-        legal_moves = sorted(legal_moves, key=lambda m: (
-            not board.gives_check(m),
-            not self.__is_forward(str(m), True)
-        ))
+        legal_moves = filter(lambda m: (
+            board.gives_check(m),
+        ), legal_moves)
         # Do a pre-search to find a mate in one (saves about 2 seconds if a M1 exists)
         for move in legal_moves:
             # No checks means no mate in one
@@ -50,86 +55,80 @@ class ChessEngine(Evaluator):
                 return EvaluatorResponse(board.is_checkmate())
             # Undo move
             board.pop()
-        # If no move is found run minimax
-        self.__max_value(board, None, 0, float('-inf'), float('inf'), line)
-            
-        line = list(filter(lambda x: x != "", line))
+
+        # If no move is found run negamax
+        line = Line([])
+        res = self.negamax(board, float('-inf'), float('inf'), self.cutoff, line)
+        # print(line.line)
+
         board_copy = board.copy()
-        for move in line:
+        for move in line.line:
             board_copy.push(move)
-        return EvaluatorResponse(board_copy.is_checkmate())
 
-    def __max_value(self, state: chess.Board, move: chess.Move, depth: int, alpha: int, beta: int,
-                    pline: list[str]) -> Result:
-        if state.outcome() or depth == self.cutoff:
-            # TODO: handle board initial position is mate
-            return Result(move, self.__calculate_utility(state, depth))
+        return EvaluatorResponse(board_copy.is_checkmate(), res)
 
-        best_move: Result = Result(None, float('-inf'))
 
+    def negamax(self, state: chess.Board, alpha: int, beta: int, depth: int, pline: Line) -> int:
+        line: Line = Line([])
+
+        # If at max depth 0, calculate utility
+        if depth == 0:
+            return self.__calculate_utility(state, depth)
+
+        best_value = float("-inf")
+
+        # Find legal moves and use sorting heuristic to optimize alpha/beta pruning
         legal_moves = list(state.legal_moves)
         legal_moves = sorted(legal_moves, key=lambda m: (
             not state.is_capture(m),
             not state.gives_check(m),
-            not self.__is_forward(str(m), True)
         ))
 
-        for a in legal_moves:
-            state2 = state.copy()
-            state2.push(a)
-            line = ["" for _ in range(self.cutoff)]
-            result: Result = self.__min_value(state2, a, depth + 1, alpha, beta, line)
-            if result.value > best_move.value:
-                best_move.value = result.value
-                best_move.move = a
-                if best_move.value > alpha:
-                    pline[0] = best_move.move
-                    for i in range(len(line) - 1):
-                        pline[i + 1] = line[i]
-                alpha = max(best_move.value, alpha)
-            if best_move.value >= beta:
-                return best_move
-        return best_move
-
-    def __min_value(self, state: chess.Board, move: chess.Move, depth: int, alpha: int, beta: int,
-                    pline: list[str]) -> Result:
-        if state.outcome() or depth == self.cutoff:
-            # TODO: handle board initial position is mate
-            return Result(move, self.__calculate_utility(state, depth))
-
-        best_move: Result = Result(None, float('inf'))
-
-        legal_moves = list(state.legal_moves)
-        legal_moves = sorted(legal_moves, key=lambda m: (
-            not state.is_capture(m),
-            not state.gives_check(m),
-            not self.__is_forward(str(m), False)
-        ))
+        # Check if potential checkmate
+        if len(legal_moves) == 0:
+            pline.line = []
+            return self.__calculate_utility(state, depth)
 
         for a in legal_moves:
-            state2 = state.copy()
-            state2.push(a)
-            line = ["" for _ in range(self.cutoff)]
-            result: Result = self.__max_value(state2, a, depth + 1, alpha, beta, line)
-            if result.value < best_move.value:
-                best_move.value = result.value
-                best_move.move = a
-                if best_move.value < beta:
-                    pline[0] = best_move.move
-                    for i in range(len(line) - 1):
-                        pline[i + 1] = line[i]
-                beta = min(best_move.value, beta)
-            if best_move.value <= alpha:
-                return best_move
-        return best_move
+            state.push(a)
+            score = -self.negamax(state, -beta, -alpha, depth - 1, line)
+            state.pop()
+            if score > best_value:
+                best_value = score
+                if score > alpha:
+                    alpha = score
+                    pline.line = [a] + line.line
+            if score >= beta:
+                return best_value
+        return best_value
+
+    # Domain specific chess position evaluation
+    def __evaluate_position(self, board: chess.Board) -> int:
+        evaluation: int = 0
+
+        # Evaluate piece imbalance
+        piece_values = {
+            chess.KING   : 0,
+            chess.PAWN   : 1,
+            chess.KNIGHT : 3,
+            chess.BISHOP : 3,
+            chess.ROOK   : 5,
+            chess.QUEEN  : 9
+        }
+        white = 0
+        black = 0
+        for piece in board.piece_map().items():
+            p = piece[1]
+            if p.color == chess.WHITE:
+                evaluation += piece_values[p.piece_type]
+            else:
+                evaluation -= piece_values[p.piece_type]
+
+        return evaluation + (white - black)
 
     def __calculate_utility(self, state: chess.Board, depth: int) -> int:
-        utility: int = 0
+        # Utility must indicate a negative score, representing the badness of a position
+        # for the given player
         if state.is_checkmate():
-            utility = 1 + (self.cutoff - depth)
-        else:
-            utility = 0
-        # if 0 black has made a move that turned game to checkmate (white is checking for this)
-        if depth % 2 == 0:
-            utility *= -1
-        return utility
+            return -(100000 + depth)
+        return self.__evaluate_position(state) * (-1 if state.turn else 1)
