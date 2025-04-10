@@ -2,7 +2,7 @@ from chess_engine import ChessEngine
 from .crossover.singlepoint import SinglePoint
 from .fitness.checkmate import Checkmate
 from .genetic import Genetic
-from .mutation.add_random_piece import AddRandomPieces
+from .mutation.add_random_pieces import AddRandomPieces
 from .population.kings_court import KingsCourt
 from .tournament.sorted_ascending import SortedAscending
 
