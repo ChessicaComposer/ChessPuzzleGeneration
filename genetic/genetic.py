@@ -6,10 +6,6 @@ from genetic.mutation.base import Mutation
 from .fitness.base import Fitness
 from .population.base import Population
 from .tournament.base import Tournament
-
-from .crossover import Crossover
-from .mutation import Mutation
-from .fitness import Fitness
 from common.conditions import Conditions
 import time
 
@@ -69,7 +65,7 @@ class Genetic:
             return True
         return False
     
-    def run(self, conditions: Conditions, population_size: int):
+    def run(self, population_size: int, conditions: Conditions):
         # Start time
         start = time.time()
         
