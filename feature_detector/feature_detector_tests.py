@@ -12,7 +12,7 @@ class TestFeatureDetectorPly5(unittest.TestCase):
     def test_run(self):
         feats: Features = self.fd.run(self.evaluation)
         self.assertEqual({4, 5}, feats.checkers)
-        self.assertEqual(0, feats.check_count)
+        self.assertEqual(2, feats.check_count)
         self.assertEqual({5}, feats.kingkillers)
         # feats.print()
 
