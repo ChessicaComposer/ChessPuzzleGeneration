@@ -50,7 +50,7 @@ class FeatureDetector:
         return checkers, checks_count
 
     def _analyse_kingkillers(self, killers: set[int], board: chess.Board):
-        killers_squares = board.attackers(chess.WHITE, board.king(False))
+        killers_squares = board.attackers(chess.WHITE, board.king(chess.BLACK))
         for square in killers_squares:
             piece = board.piece_type_at(square)
             killers.add(piece)
