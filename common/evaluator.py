@@ -1,10 +1,11 @@
 import chess
 
-
 class EvaluatorResponse:
-    def __init__(self, has_mate: bool, utility: float):
+    def __init__(self, fen: str, has_mate: bool, utility: float, moves):
+        self.fen = fen
         self.has_mate = has_mate
         self.utility = utility
+        self.moves = moves
 
 
 class Evaluator:
