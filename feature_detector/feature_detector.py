@@ -31,19 +31,23 @@ class FeatureDetector:
 
         board = chess.Board(evaluation.fen)
         for move in evaluation.moves.line:
-            self._analyse_checks(checkers, checks_count, board)
+            s, c = self._analyse_checks(checkers, board)
+            checkers.update(s)
+            checks_count += c
             board.push(move)
         self._analyse_kingkillers(kingkillers, board)
 
         return Features(checkers, checks_count, kingkillers)
 
-    def _analyse_checks(self, checkers: set[int], checks_count: int, board: chess.Board):
+    def _analyse_checks(self, checkers: set[int], board: chess.Board) -> tuple[set[int], int]:
+        checks_count = 0
         if board.turn is False and board.is_check():
             checks_count += 1
             checkers_squares = board.checkers()
             for square in checkers_squares:
                 piece = board.piece_type_at(square)
                 checkers.add(piece)
+        return checkers, checks_count
 
     def _analyse_kingkillers(self, killers: set[int], board: chess.Board):
         killers_squares = board.attackers(chess.WHITE, board.king(False))
