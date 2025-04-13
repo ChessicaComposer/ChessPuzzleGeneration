@@ -17,13 +17,13 @@ class TestFeatureDetectorPly5(unittest.TestCase):
         e = ChessEngine(5).run(board)
         evaluations.append(e)
 
-    def test_run_kingkiller_queen(self):
+    def test_run_checkmate_queen(self):
         feats: Features = self.fd.run(self.evaluations[0])
         self.assertEqual({chess.ROOK, chess.QUEEN}, feats.checkers)
         self.assertEqual(2, feats.check_count)
         self.assertEqual({chess.QUEEN}, feats.king_attackers)
 
-    def test_run_kingkiller_pawn(self):
+    def test_run_checkmate_pawn(self):
         feats: Features = self.fd.run(self.evaluations[1])
         self.assertEqual({chess.BISHOP, chess.ROOK}, feats.checkers)
         self.assertEqual(2, feats.check_count)
