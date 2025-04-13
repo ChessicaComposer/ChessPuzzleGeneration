@@ -28,19 +28,3 @@ class TestFeatureDetectorPly5(unittest.TestCase):
         self.assertEqual({chess.BISHOP, chess.ROOK}, feats.checkers)
         self.assertEqual(2, feats.check_count)
         self.assertEqual({chess.PAWN}, feats.kingkillers)
-
-
-"""
-    def test_find_checkers(self):
-        checkers = self.fd.get_checkers(self.evaluation)
-        self.assertSetEqual({4, 5}, checkers)
-
-    def test_find_kingkillers(self):
-        killers = self.fd.get_kingkillers(self.evaluation)
-        self.assertSetEqual({5}, killers)
-
-    def test_set_checkers_killers(self):
-        self.fd.run(self.evaluation)
-        self.assertSetEqual({5}, self.fd.kingkillers)
-        self.assertSetEqual({4, 5}, self.fd.checkers)
-"""
