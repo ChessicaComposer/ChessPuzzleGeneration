@@ -29,31 +29,37 @@ class FeatureDetector:
         checks_count = 0
         kingkillers = set()
 
-        board = chess.Board(evaluation.fen)
-        for move in evaluation.moves.line:
-            s, c = self._analyse_checks(checkers, board)
-            checkers.update(s)
-            checks_count += c
-            board.push(move)
-        self._analyse_kingkillers(kingkillers, board)
+        if evaluation.has_mate:
+            board = chess.Board(evaluation.fen)
+            for move in evaluation.moves.line:
+                s, c = self._analyse_checks(board)
+                checkers.update(s)
+                checks_count += c
+                board.push(move)
+            k = self._analyse_kingkillers(board)
+            kingkillers.update(k)
 
         return Features(checkers, checks_count, kingkillers)
 
-    def _analyse_checks(self, checkers: set[int], board: chess.Board) -> tuple[set[int], int]:
+    def _analyse_checks(self, board: chess.Board) -> tuple[set[int], int]:
+        checkers = set()
         checks_count = 0
-        if board.turn is False and board.is_check():
-            checks_count += 1
-            checkers_squares = board.checkers()
-            for square in checkers_squares:
-                piece = board.piece_type_at(square)
-                checkers.add(piece)
+        if not board.is_checkmate():
+            if board.turn is False and board.is_check():
+                checks_count += 1
+                checkers_squares = board.checkers()
+                for square in checkers_squares:
+                    piece = board.piece_type_at(square)
+                    checkers.add(piece)
         return checkers, checks_count
 
-    def _analyse_kingkillers(self, killers: set[int], board: chess.Board):
+    def _analyse_kingkillers(self, board: chess.Board) -> set[int]:
+        killers = set()
         killers_squares = board.attackers(chess.WHITE, board.king(chess.BLACK))
         for square in killers_squares:
             piece = board.piece_type_at(square)
             killers.add(piece)
+        return killers
 
 
 """
