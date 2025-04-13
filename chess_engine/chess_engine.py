@@ -1,7 +1,7 @@
 import chess
 from .result import Result
 from functools import cache
-from common.evaluator import Evaluator, EvaluatorResponse
+from common.evaluator import Evaluator, EvaluatorResponse, Line
 
 """
 Sources
@@ -18,9 +18,9 @@ Last modified: 11/04/02
 """
 
 
-class Line:
-    def __init__(self, line: list[chess.Move]):
-        self.line = line
+# class Line:
+#    def __init__(self, line: list[chess.Move]):
+#        self.line = line
 
 
 class ChessEngine(Evaluator):
@@ -52,7 +52,7 @@ class ChessEngine(Evaluator):
                 break
             board.push(move)
             if board.is_checkmate():
-                return EvaluatorResponse(board.is_checkmate())
+                return EvaluatorResponse(board.fen(), board.is_checkmate(), self.__calculate_utility(board, 0), Line([move]))
             # Undo move
             board.pop()
 
@@ -65,7 +65,7 @@ class ChessEngine(Evaluator):
         for move in line.line:
             board_copy.push(move)
 
-        return EvaluatorResponse(board_copy.is_checkmate(), res)
+        return EvaluatorResponse(board.fen(), board_copy.is_checkmate(), res, line)
 
 
     def negamax(self, state: chess.Board, alpha: int, beta: int, depth: int, pline: Line) -> int:
