@@ -6,16 +6,16 @@ class Features:
     def __init__(self,
                  checkers: set[int],
                  checks_count: int,
-                 kingkillers: set[int]
-                ):
+                 king_attackers: set[int]
+                 ):
         self.checkers = checkers
         self.check_count = checks_count
-        self.kingkillers = kingkillers
+        self.king_attackers = king_attackers
 
     def print(self):
         print(self.checkers)
         print(self.check_count)
-        print(self.kingkillers)
+        print(self.king_attackers)
 
 
 class FeatureDetector:
@@ -27,7 +27,7 @@ class FeatureDetector:
         # Auxiliary sets
         checkers = set()
         checks_count = 0
-        kingkillers = set()
+        king_attackers = set()
 
         if evaluation.has_mate:
             board = chess.Board(evaluation.fen)
@@ -36,10 +36,10 @@ class FeatureDetector:
                 checkers.update(s)
                 checks_count += c
                 board.push(move)
-            k = self._analyse_kingkillers(board)
-            kingkillers.update(k)
+            k = self._analyse_kingattackers(board)
+            king_attackers.update(k)
 
-        return Features(checkers, checks_count, kingkillers)
+        return Features(checkers, checks_count, king_attackers)
 
     def _analyse_checks(self, board: chess.Board) -> tuple[set[int], int]:
         checkers = set()
@@ -53,10 +53,10 @@ class FeatureDetector:
                     checkers.add(piece)
         return checkers, checks_count
 
-    def _analyse_kingkillers(self, board: chess.Board) -> set[int]:
-        killers = set()
-        killers_squares = board.attackers(chess.WHITE, board.king(chess.BLACK))
-        for square in killers_squares:
+    def _analyse_kingattackers(self, board: chess.Board) -> set[int]:
+        attackers = set()
+        attackers_squares = board.attackers(chess.WHITE, board.king(chess.BLACK))
+        for square in attackers_squares:
             piece = board.piece_type_at(square)
-            killers.add(piece)
-        return killers
+            attackers.add(piece)
+        return attackers

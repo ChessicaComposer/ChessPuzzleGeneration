@@ -21,10 +21,10 @@ class TestFeatureDetectorPly5(unittest.TestCase):
         feats: Features = self.fd.run(self.evaluations[0])
         self.assertEqual({chess.ROOK, chess.QUEEN}, feats.checkers)
         self.assertEqual(2, feats.check_count)
-        self.assertEqual({chess.QUEEN}, feats.kingkillers)
+        self.assertEqual({chess.QUEEN}, feats.king_attackers)
 
     def test_run_kingkiller_pawn(self):
         feats: Features = self.fd.run(self.evaluations[1])
         self.assertEqual({chess.BISHOP, chess.ROOK}, feats.checkers)
         self.assertEqual(2, feats.check_count)
-        self.assertEqual({chess.PAWN}, feats.kingkillers)
+        self.assertEqual({chess.PAWN}, feats.king_attackers)
