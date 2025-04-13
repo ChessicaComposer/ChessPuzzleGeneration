@@ -1,7 +1,7 @@
 import chess
 from .result import Result
 from functools import cache
-from common.evaluator import Evaluator, EvaluatorResponse
+from common.evaluator import Evaluator, EvaluatorResponse, Line
 from .utility import evaluate_position, evaluate_move_stack, PIECE_VALUES
 
 """
@@ -17,12 +17,6 @@ Inspired by "PV-List on the Stack": https://www.chessprogramming.org/Principal_V
 Author: Bruce Moreland 2001
 Last modified: 11/04/02
 """
-
-
-class Line:
-    def __init__(self, line: list[chess.Move]):
-        self.line = line
-
 
 class ChessEngine(Evaluator):
     def __init__(self, cutoff: int = 5):
@@ -58,7 +52,7 @@ class ChessEngine(Evaluator):
                 break
             board.push(move)
             if board.is_checkmate():
-                return EvaluatorResponse(board.is_checkmate())
+                return EvaluatorResponse(board.fen(), board.is_checkmate(), self.__calculate_utility(board, 0), Line([move]))
             # Undo move
             board.pop()
 
@@ -67,13 +61,13 @@ class ChessEngine(Evaluator):
 
         line = Line([])
         res = self.negamax(board, float('-inf'), float('inf'), self.cutoff, line)
-        print(line.line)
+        # print(line.line)
 
         board_copy = board.copy()
         for move in line.line:
             board_copy.push(move)
 
-        return EvaluatorResponse(board_copy.is_checkmate(), res)
+        return EvaluatorResponse(board.fen(), board_copy.is_checkmate(), res, line)
 
 
     def negamax(self, state: chess.Board, alpha: int, beta: int, depth: int, pline: Line) -> int:
