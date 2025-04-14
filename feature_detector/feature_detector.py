@@ -41,7 +41,8 @@ class FeatureDetector:
 
     def run(self, evaluation: EvaluatorResponse) -> Features:
         # Auxiliary sets
-        pieces = {}
+        pieces = ({1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0}, 
+                  {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0})
         checkers = set()
         checks_count = 0
         king_attackers = set()
