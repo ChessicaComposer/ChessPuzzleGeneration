@@ -54,6 +54,9 @@ class AddRandomPieces(Mutation):
             old_piece = board[random_pos]
             board[random_pos] = board[random_piece_pos]
             board[random_piece_pos] = old_piece
+        else:
+            board[random_pos] = board[random_piece_pos]
+            board[random_piece_pos] = 0
         return board
 
     def _remove_random_piece(self, board: list[int]) -> list[int]:
