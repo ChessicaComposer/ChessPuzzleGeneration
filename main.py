@@ -48,7 +48,6 @@ class Main(cmd.Cmd):
                 conditions = self.__format_conditions__(args)
                 if conditions is None: return
                 result = FullBoard().run(int(args[1]), conditions)
-                return
             case _:
                 print("Unknown generator type.")
                 return
