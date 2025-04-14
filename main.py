@@ -8,8 +8,10 @@ from genetic.utility import chess_int_to_board
 
 
 class Main(cmd.Cmd):
-    prompt = 'ChessPuzzleGeneration>> '
-    intro = 'Welcome to the ChessPuzzleGenerator! Type "help" or "?" to list commands.\n Usage: run <Composer | FullBoard> <Ply: int> <Population: int> <Time-limit: int | None> <Generation-limit: int | None> <Evaluation-limit: int | None>'
+    prompt = 'ChessPuzzleGenerator>> '
+    intro = ('Welcome to the ChessPuzzleGenerator! Type "help" or "?" to list commands\n'
+             '- Usage: run <Composer | FullBoard> <Ply: int> <Population: int> <Time-limit: int | None> <Generation-limit: int | None> <Evaluation-limit: int | None>\n'
+             '- Example: run composer 5 100 14400 none none')
 
     def __init__(self):
         super().__init__()
