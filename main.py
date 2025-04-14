@@ -70,7 +70,7 @@ class Main(cmd.Cmd):
         return
 
     def _format_conditions(self, args: list[str]) -> Conditions | None:
-        if len(args) < 5:
+        if len(args) < 6:
             self._print_insufficient_args()
             print("- Example: run composer 100 None 100 None")
             return None

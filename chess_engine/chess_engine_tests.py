@@ -51,7 +51,7 @@ class TestChessEnginePly5(unittest.TestCase):
                 self.assertIsNot(True, res.has_mate)
             else:
                 self.assertEqual(True, res.has_mate)
-                self.assertGreaterEqual(5, len(res.moves.line))
+                self.assertGreaterEqual(5, len(res.moves))
 
     def test_run_m2(self):
         for i in range(len(self.m2)):
@@ -59,7 +59,7 @@ class TestChessEnginePly5(unittest.TestCase):
             res = self.engine.run(board)
 
             self.assertEqual(True, res.has_mate)
-            self.assertEqual(3, len(res.moves.line))
+            self.assertEqual(3, len(res.moves))
 
     def test_run_m3_loaded(self):
         for i in range(len(self.m3_loaded)):
@@ -67,4 +67,4 @@ class TestChessEnginePly5(unittest.TestCase):
             res = self.engine.run(board)
 
             self.assertEqual(True, res.has_mate)
-            self.assertEqual(5, len(res.moves.line))
+            self.assertEqual(5, len(res.moves))
