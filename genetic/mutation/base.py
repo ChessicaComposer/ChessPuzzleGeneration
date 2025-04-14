@@ -1,4 +1,4 @@
-from .chromosome import Chromosome
+from genetic.chromosome import Chromosome
 
 class Mutation:
     def __init__(self):

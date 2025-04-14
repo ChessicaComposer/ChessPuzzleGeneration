@@ -1,74 +1,93 @@
 from common.evaluator import Evaluator
 from multiprocessing import Pool
 from .chromosome import Chromosome
-from .crossover import Crossover
-from .mutation import Mutation
-from .fitness import Fitness
+from genetic.crossover.base import Crossover
+from genetic.mutation.base import Mutation
+from .fitness.base import Fitness
+from .population.base import Population
+from .tournament.base import Tournament
+from common.conditions import Conditions
+import time
 
 class Genetic:
     # Define parameters
-    def __init__(self, evaluator: Evaluator = None, crossover: Crossover = None, mutation: Mutation = None, fitness: Fitness = None):
+    def __init__(self,
+                 evaluator: Evaluator = None,
+                 crossover: Crossover = None,
+                 mutation: Mutation = None,
+                 fitness: Fitness = None,
+                 population: Population = None,
+                 tournament: Tournament = None,
+                 max_fitness: float = 10):
         self.population_evaluations: list[float] = []  # avg scores per population
+        self.elevated_individuals: list[Chromosome] = []
+        self.max_fitness: float = max_fitness
         self.evaluator: Evaluator = evaluator
         self.crossover: Crossover = crossover
         self.mutation: Mutation = mutation
         self.fitness: Fitness = fitness
+        self.population: Population = population
+        self.tournament: Tournament = tournament
         self.fitness.set_evaluator(evaluator)
-
-    # Fitness function
-    def _get_fitness(self, chromosome: Chromosome) -> Chromosome:
-        return self.fitness.score(chromosome)
-
-    def _mutate(self, population: list[Chromosome]) -> list[Chromosome]:
-        return self.mutation.mutate(population)
-
-    # Create population
-    def _create_population(self, amount: int) -> list[Chromosome]:
-        raise NotImplementedError()
 
     # Evaluate chromosome as thread
     def _evaluation_thread(self, chromosome: Chromosome) -> Chromosome:
-        return self._get_fitness(chromosome)
+        return self.fitness.score(chromosome)
 
     # Return list representing score of individual chromosome from population
     def _evaluate_population(self, population: list[Chromosome]) -> list[Chromosome]:
         # evaluations = [0.0 for _ in range(len(population))]
         with Pool(processes=10) as pool:
             population = pool.map(self._evaluation_thread, population)
+
+        # Store scoring before extraction to keep track of successful generations
         scores = list(map(lambda c: c.score, population))
         joint_score = sum(scores)
         self.population_evaluations.append(joint_score / len(population))
+
+        # Extract "perfect" individuals
+        for i, chromosome in enumerate(population):
+            if chromosome.score >= self.max_fitness:
+                self.elevated_individuals.append(chromosome)
+
+                # Generate replacement
+                replacement = self.population.create(1)[0]
+                population[i] = replacement
+
         return population
 
-    def _run_tournament(self, population: list[Chromosome]) -> list[Chromosome]:
-        raise NotImplementedError()
-
-    def _reproduce(self, population: list[Chromosome]) -> list[Chromosome]:
-        return self.crossover.reproduce(population)
-
-    def _stop_condition(self, generation) -> bool:
-        raise NotImplementedError()
-
-    def run(self, generations: int, population_size: int):
+    def _stop_condition(self, current: Conditions, conditions: Conditions) -> bool:
+        if current.time_limit >= conditions.time_limit:
+            return True
+        if current.generation_limit >= conditions.generation_limit:
+            return True
+        if current.evaluation_limit >= conditions.evaluation_limit:
+            return True
+        return False
+    
+    def run(self, population_size: int, conditions: Conditions):
+        # Start time
+        start = time.time()
+        
         # Initialize population
-        population = self._create_population(population_size)
+        population = self.population.create(population_size)
 
         # Initial evaluation
         population = self._evaluate_population(population)
 
         generation = 0
-
+        stop_condition = False
         # Evaluate cost
-        for _ in range(generations):
+        while(not stop_condition):
             print("Generation " + str(generation + 1))
             # Select mate
-            parents = self._run_tournament(population)
+            parents = self.tournament.run(population)
 
             # Reproduce
-            children = self._reproduce(parents)
+            children = self.crossover.reproduce(parents)
 
             # Mutate
-            children = self._mutate(children)
+            children = self.mutation.mutate(children)
 
             # Update population
             population = parents + children
@@ -77,9 +96,9 @@ class Genetic:
             population = self._evaluate_population(population)
             generation += 1
 
-            # Test
-            if self._stop_condition(generation):
-                break
+            # Check if conditions have been met
+            current_conditions = Conditions(time.time() - start, generation,max(list(map(lambda c: c.score, population))))
+            stop_condition = self._stop_condition(current_conditions, conditions)
 
         print(self.population_evaluations)
-        return population
+        return self.elevated_individuals
