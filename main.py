@@ -72,7 +72,7 @@ class Main(cmd.Cmd):
 
     def __run_help__(self, arg):
         match arg:
-            case "generator-type" | "generator":
+            case "generator-type" | "generator" | "composer" | "fullboard":
                 print("Available generator types:\n"
                       "==========================\n"
                       "FullBoard | Composer\n"
