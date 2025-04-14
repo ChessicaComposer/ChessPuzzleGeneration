@@ -14,13 +14,6 @@ class Main(cmd.Cmd):
 
     def __init__(self):
         super().__init__()
-        self.current_directory = os.getcwd()
-
-    def do_list(self):
-        """List files and directories in the current directory."""
-        files_and_dirs = os.listdir(self.current_directory)
-        for item in files_and_dirs:
-            print(item)
 
     def do_quit(self, args):
         """Quits the program."""
