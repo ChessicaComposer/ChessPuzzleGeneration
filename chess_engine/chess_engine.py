@@ -92,7 +92,7 @@ class ChessEngine(Evaluator):
             return self.__calculate_utility(state, depth)
 
         for a in legal_moves:
-            self.moves[depth-1] = state.piece_at(a.to_square)
+            self.moves[depth - 1] = state.piece_at(a.to_square)
             state.push(a)
             score = -self.negamax(state, -beta, -alpha, depth - 1, line)
             state.pop()
@@ -110,10 +110,10 @@ class ChessEngine(Evaluator):
         # for the given player
         if state.is_checkmate():
             return -(100000 + depth)
-        #return evaluate_position(state) * (-1 if state.turn else 1)
         evaluation = 0
 
-        for piece in self.moves:
+        for i in range(self.cutoff - depth):
+            piece = self.moves[i]
             if not piece:
                 continue
             evaluation += PIECE_VALUES[piece.piece_type] * (-1 if piece.color == chess.WHITE else 1)
