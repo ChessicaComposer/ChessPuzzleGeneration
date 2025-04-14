@@ -1,5 +1,6 @@
 import chess
 from common import EvaluatorResponse, Line
+from collections import defaultdict
 
 
 class Features:
@@ -39,8 +40,7 @@ class FeatureDetector:
 
     def run(self, evaluation: EvaluatorResponse) -> Features:
         # Auxiliary sets
-        pieces = ({1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0}, 
-                  {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0})
+        pieces = (defaultdict(int), defaultdict(int))
         checkers = set()
         checks_count = 0
         king_attackers = set()
@@ -59,8 +59,8 @@ class FeatureDetector:
         return Features(pieces, checkers, checks_count, king_attackers)
 
     def _analyse_pieces(self, board: chess.Board) -> tuple[dict[int, int], dict[int, int]]:
-        black = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0}
-        white = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0}
+        black = defaultdict(int)
+        white = defaultdict(int)
         for square in chess.SQUARES:
             if board.piece_at(square) is not None:
                 if board.color_at(square) == chess.WHITE:
