@@ -4,7 +4,6 @@ from common.conditions import Conditions
 from genetic import Composer
 from genetic import FullBoard
 import cmd
-
 from genetic.utility import chess_int_to_board
 
 

@@ -23,8 +23,16 @@ class TestFeatureDetectorPly5(unittest.TestCase):
         self.assertEqual(2, feats.check_count)
         self.assertEqual({chess.QUEEN}, feats.king_attackers)
 
+        self.assertIs(3, feats.count_pieces(chess.BLACK))
+        self.assertIs(4, feats.count_pieces(chess.WHITE))
+        self.assertIs(0, feats.count_piece_type(chess.BLACK, chess.ROOK))
+
     def test_run_checkmate_pawn(self):
         feats: Features = self.fd.run(self.evaluations[1])
         self.assertEqual({chess.BISHOP, chess.ROOK}, feats.checkers)
         self.assertEqual(2, feats.check_count)
         self.assertEqual({chess.PAWN}, feats.king_attackers)
+
+        self.assertIs(7, feats.count_pieces(chess.BLACK))
+        self.assertIs(9, feats.count_pieces(chess.WHITE))
+        self.assertIs(1, feats.count_piece_type(chess.BLACK, chess.ROOK))
