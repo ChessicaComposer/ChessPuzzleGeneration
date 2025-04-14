@@ -65,6 +65,8 @@ class AddRandomPieces(Mutation):
             if board[i] != 0:
                 piece_positions.append(i)
 
+        if len(piece_positions) == 0:
+            return board
         random_piece = piece_positions[randint(0, len(piece_positions) - 1)]
         while random_piece in [9, 10] and len(piece_positions) > 2:
             random_piece = piece_positions[randint(0, len(piece_positions) - 1)]
