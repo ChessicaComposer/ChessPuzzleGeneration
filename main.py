@@ -26,6 +26,10 @@ class Main(cmd.Cmd):
         """
 
         args = args.lower().split()
+        if len(args) == 0:
+            self.do_help("run")
+            return
+
         result = list()
 
         match args[0]:
