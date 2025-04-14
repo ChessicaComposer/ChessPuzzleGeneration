@@ -23,7 +23,7 @@ def evaluate_position(board: chess.Board) -> int:
         else:
             evaluation -= PIECE_VALUES[p.piece_type]
 
-    return evaluation + (white - black)
+    return evaluation
 
 
 def evaluate_move_stack(board: chess.Board) -> int:
