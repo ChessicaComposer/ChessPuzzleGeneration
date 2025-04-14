@@ -14,8 +14,6 @@ def evaluate_position(board: chess.Board) -> int:
     evaluation: int = 0
 
     # Evaluate piece imbalance
-    white = 0
-    black = 0
     for piece in board.piece_map().items():
         p = piece[1]
         if p.color == chess.WHITE:
