@@ -20,6 +20,9 @@ class Fitness(Evaluator):
         evaluation: EvaluatorResponse = self.evaluator.run(board)
         fitness = self._evaluate_fitness(evaluation)
         chromosome.set_score(fitness)
+        # Save moves and board in chromosome (used for pv-line crossover)
+        chromosome.set_moves(evaluation.moves)
+        chromosome.set_board(evaluation.fen)
 
         return chromosome
 

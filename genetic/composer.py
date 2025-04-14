@@ -1,5 +1,6 @@
 from chess_engine import ChessEngine
 from .crossover.singlepoint import SinglePoint
+from .crossover.pv_line import PvLine
 from .fitness.checkmate import Checkmate
 from .genetic import Genetic
 from .mutation.add_random_pieces import AddRandomPieces
@@ -11,7 +12,7 @@ class Composer(Genetic):
     def __init__(self, cutoff = 5):
         super().__init__(
             evaluator = ChessEngine(cutoff),
-            crossover = SinglePoint(),
+            crossover = PvLine(),
             mutation = AddRandomPieces(),
             fitness = Checkmate(),
             population = KingsCourt(),

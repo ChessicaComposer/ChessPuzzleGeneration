@@ -65,7 +65,7 @@ class ChessEngine(Evaluator):
         for move in line.line:
             board_copy.push(move)
 
-        return EvaluatorResponse(board_copy.is_checkmate(), res)
+        return EvaluatorResponse(board_copy.is_checkmate(), res, line.line, board.fen())
 
 
     def negamax(self, state: chess.Board, alpha: int, beta: int, depth: int, pline: Line) -> int:
