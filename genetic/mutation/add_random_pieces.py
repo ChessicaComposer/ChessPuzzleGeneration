@@ -1,5 +1,5 @@
 from genetic.mutation.base import Mutation
-from random import randint
+from random import random, randint
 from ..constants import PIECE_MAP
 from ..chromosome import IntBoard
 
@@ -7,15 +7,18 @@ from ..chromosome import IntBoard
 class AddRandomPieces(Mutation):
     def __init__(self):
         super().__init__()
+        self.chance = 0.25
 
     def mutate(self, population: list[IntBoard]) -> list[IntBoard]:
         for i, chromosome in enumerate(population):
-            if randint(0, 100) < 20:
+            if random() < self.chance:
                 population[i].set_evaluated(False)
                 board = population[i].body
-                population[i].body = self._add_random_piece(board)
-                # TODO: Randomly move pieces as well here
 
+                if random() < 0.5:
+                    population[i].body = self._add_random_piece(board)
+                else:
+                    population[i].body = self._make_random_moves(board)
         return population
 
     def _add_random_piece(self, board: list[int]) -> list[int]:
@@ -35,4 +38,38 @@ class AddRandomPieces(Mutation):
         board[random_position] = random_piece
         return board
 
-    #def _make_random_moves(self):
+    def _make_random_moves(self, board: list[int]) -> list[int]:
+        piece_positions = []
+        for i in range(len(board)):
+            if board[i] != 0:
+                piece_positions.append(i)
+
+        if len(piece_positions) == 0:
+            return board
+
+        random_piece_pos = randint(0, len(piece_positions) - 1)
+        random_pos = randint(0, len(board) - 1)
+
+        if board[random_pos] != 0:
+            old_piece = board[random_pos]
+            board[random_pos] = board[random_piece_pos]
+            board[random_piece_pos] = old_piece
+        else:
+            board[random_pos] = board[random_piece_pos]
+            board[random_piece_pos] = 0
+        return board
+
+    def _remove_random_piece(self, board: list[int]) -> list[int]:
+        piece_positions = []
+        for i in range(len(board)):
+            if board[i] != 0:
+                piece_positions.append(i)
+
+        if len(piece_positions) == 0:
+            return board
+        random_piece = piece_positions[randint(0, len(piece_positions) - 1)]
+        while random_piece in [9, 10] and len(piece_positions) > 2:
+            random_piece = piece_positions[randint(0, len(piece_positions) - 1)]
+
+        board[random_piece] = 0
+        return board
