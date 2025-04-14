@@ -9,23 +9,23 @@ class Features:
                  checks_count: int,
                  king_attackers: set[int]
                  ):
-        self._pieces_ = pieces
+        self._pieces = pieces
         self.checkers = checkers
         self.check_count = checks_count
         self.king_attackers = king_attackers
 
     def print(self):
-        print(self._pieces_)
+        print(self._pieces)
         print(self.checkers)
         print(self.check_count)
         print(self.king_attackers)
 
     def count_pieces(self, color: chess.Color):
-        pieces: dict = self._pieces_[self._convert_color(color)]
+        pieces: dict = self._pieces[self._convert_color(color)]
         return sum(pieces.values())
 
     def count_piece_type(self, color: chess.Color, piece_type: chess.PieceType):
-        pieces: dict = self._pieces_[self._convert_color(color)]
+        pieces: dict = self._pieces[self._convert_color(color)]
         return pieces[piece_type]
 
     def _convert_color(self, color: chess.Color) -> int:
