@@ -50,9 +50,7 @@ class Main(cmd.Cmd):
                 return
 
         if len(args) < 5:
-            print("- Insufficient number of arguments.\n"
-                  "- Usage: run <generator-type> <population-size> <time-limit or None> <generation-limit or None> <evaluation-limit or None>\n"
-                  "- More info: run help <type>")
+            self.__print_insufficient_args__()
             return
 
         for c in result:
@@ -62,9 +60,8 @@ class Main(cmd.Cmd):
 
     def __format_conditions__(self, args: list[str]) -> Conditions | None:
         if len(args) < 5:
-            print("- Insufficient number of arguments.\n"
-                  "- Usage: run <generator-type> <population-size> <time-limit or None> <generation-limit or None> <evaluation-limit or None>\n"
-                  "- Example: run composer 100 None 100 None")
+            self.__print_insufficient_args__()
+            print("- Example: run composer 100 None 100 None")
             return None
         aux = []
         for arg in args[2:]:
@@ -93,6 +90,12 @@ class Main(cmd.Cmd):
             case _:
                 print("Unknown argument type. Try 'run help'.")
         return
+
+    def __print_insufficient_args__(self):
+        print("Insufficient number of arguments.\n"
+              "===================================\n"
+              "- Usage: run <generator-type> <population-size> <time-limit or None> <generation-limit or None> <evaluation-limit or None>\n"
+              "- More info: run help <type>")
 
     def postloop(self):
         print("Have a nice day!")
