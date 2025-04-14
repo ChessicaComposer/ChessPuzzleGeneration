@@ -29,9 +29,7 @@ class Features:
         return pieces[piece_type]
 
     def _convert_color(self, color: chess.Color) -> int:
-        if color is chess.WHITE: return 1
-        elif color is chess.BLACK: return 0
-        else: raise ValueError
+        return int(color)
 
 
 class FeatureDetector:
