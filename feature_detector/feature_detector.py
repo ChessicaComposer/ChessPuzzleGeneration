@@ -48,7 +48,7 @@ class FeatureDetector:
         if evaluation.has_mate:
             board = chess.Board(evaluation.fen)
             pieces = self._analyse_pieces(board)
-            for move in evaluation.moves.line:
+            for move in evaluation.moves:
                 s, c = self._analyse_checks(board)
                 checkers.update(s)
                 checks_count += c

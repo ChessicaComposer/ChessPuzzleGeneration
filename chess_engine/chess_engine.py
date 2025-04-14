@@ -2,7 +2,7 @@ import chess
 import chess.polyglot
 from .result import Result
 from functools import cache
-from common.evaluator import Evaluator, EvaluatorResponse, Line
+from common.evaluator import Evaluator, EvaluatorResponse
 from .utility import evaluate_position, PIECE_VALUES
 
 """
@@ -70,12 +70,11 @@ class ChessEngine(Evaluator):
 
         res = self.negamax(board, float('-inf'), float('inf'), self.cutoff)
         pv_line = self.__get_pvline(board)
-        print(pv_line)
 
         board_copy = board.copy()
         for move in pv_line:
             board_copy.push(move)
-        return EvaluatorResponse(board.fen(), board_copy.is_checkmate(), res)
+        return EvaluatorResponse(board.fen(), board_copy.is_checkmate(), res, pv_line)
 
 
     def negamax(self, state: chess.Board, alpha: int, beta: int, depth: int) -> int:

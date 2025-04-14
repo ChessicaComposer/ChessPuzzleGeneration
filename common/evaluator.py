@@ -1,13 +1,8 @@
-import chess
-
-
-class Line:
-    def __init__(self, line: list[chess.Move]):
-        self.line = line
+from chess import Move, Board
 
 
 class EvaluatorResponse:
-    def __init__(self, fen: str, has_mate: bool, utility: float, moves: Line):
+    def __init__(self, fen: str, has_mate: bool, utility: float, moves: list[Move]):
         self.fen = fen
         self.has_mate = has_mate
         self.utility = utility
@@ -17,12 +12,12 @@ class EvaluatorResponse:
         print(self.fen)
         print(self.has_mate)
         print(self.utility)
-        print(self.moves.line)
+        print(self.moves)
 
 
 class Evaluator:
     def __init__(self):
         pass
 
-    def run(self, board: chess.Board) -> EvaluatorResponse:
+    def run(self, board: Board) -> EvaluatorResponse:
         raise NotImplementedError()
