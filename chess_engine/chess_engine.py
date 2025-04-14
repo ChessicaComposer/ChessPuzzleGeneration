@@ -2,7 +2,7 @@ import chess
 from .result import Result
 from functools import cache
 from common.evaluator import Evaluator, EvaluatorResponse, Line
-from .utility import evaluate_position, evaluate_move_stack, PIECE_VALUES
+from .utility import evaluate_position, PIECE_VALUES
 
 """
 Sources
@@ -25,7 +25,7 @@ class ChessEngine(Evaluator):
         self.count = 0
         self.initial_board = None
         self.initial_eval = 0
-        self.moves = [None for _ in range(cutoff)]
+        self.removed_pieces = [None for _ in range(cutoff)]
 
     @cache
     def __is_forward(self, move: str, white: bool) -> bool:
@@ -61,7 +61,6 @@ class ChessEngine(Evaluator):
 
         line = Line([])
         res = self.negamax(board, float('-inf'), float('inf'), self.cutoff, line)
-        # print(line.line)
 
         board_copy = board.copy()
         for move in line.line:
@@ -92,7 +91,8 @@ class ChessEngine(Evaluator):
             return self.__calculate_utility(state, depth)
 
         for a in legal_moves:
-            self.moves[depth - 1] = state.piece_at(a.to_square)
+            # This iterative evaluation will not take into account pawn promotions
+            self.removed_pieces[depth - 1] = state.piece_at(a.to_square)
             state.push(a)
             score = -self.negamax(state, -beta, -alpha, depth - 1, line)
             state.pop()
@@ -113,7 +113,7 @@ class ChessEngine(Evaluator):
         evaluation = 0
 
         for i in range(self.cutoff - depth):
-            piece = self.moves[i]
+            piece = self.removed_pieces[i]
             if not piece:
                 continue
             evaluation += PIECE_VALUES[piece.piece_type] * (-1 if piece.color == chess.WHITE else 1)
