@@ -24,12 +24,3 @@ def evaluate_position(board: chess.Board) -> int:
     return evaluation
 
 
-def evaluate_move_stack(board: chess.Board) -> int:
-    _board = board.copy()
-    evaluation: int = 0
-    for _ in range(len(_board.move_stack)):
-        move = _board.pop()
-        piece = _board.piece_at(move.to_square)
-        if piece:
-            evaluation += PIECE_VALUES[piece.piece_type] * (-1 if piece.color == chess.WHITE else 1)
-    return evaluation
