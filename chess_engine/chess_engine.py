@@ -69,8 +69,9 @@ class ChessEngine(Evaluator):
         res = self.negamax(board, float('-inf'), float('inf'), self.cutoff)
         pv_line = self.__get_pvline(board)
         print(pv_line)
-
-        return EvaluatorResponse(True, res)
+        for move in pv_line:
+            board.push(move)
+        return EvaluatorResponse(board.is_checkmate(), res)
 
 
     def negamax(self, state: chess.Board, alpha: int, beta: int, depth: int) -> int:
@@ -83,24 +84,20 @@ class ChessEngine(Evaluator):
 
         if hash_value in self.transposition_table:
             entry = self.transposition_table.get(hash_value)
-        else:
-            # Set invalid entry
-            entry = ttEntry(0,0,0, None)
-            entry.valid = False
-
-        if entry.depth >= depth and entry.valid:
-            # ALL-NODE
-            if entry.type == 0:
-                beta = min(beta, entry.score)
-            # CUT-NODE
-            elif entry.type == 1:
-                alpha = max(alpha, entry.score)
-            # PV-NODE
-            elif entry.type == 2:
-                return entry.score
             
-            if alpha >= beta:
-                return entry.score
+            if entry.depth >= depth and entry.valid:
+                # ALL-NODE
+                if entry.type == 0:
+                    beta = min(beta, entry.score)
+                # CUT-NODE
+                elif entry.type == 1:
+                    alpha = max(alpha, entry.score)
+                # PV-NODE
+                elif entry.type == 2:
+                    return entry.score
+                
+                if alpha >= beta:
+                    return entry.score
 
         # If at max depth 0, calculate utility
         if depth == 0:
@@ -141,9 +138,10 @@ class ChessEngine(Evaluator):
         else:  #alphaOrig < best_value < beta 
             # Set node type to PV (EXACT) (we call this 2)
             node_type = 2  
-        #if best_move is not None:
-        entry = ttEntry(best_value, depth, node_type, best_move)
-        self.transposition_table[hash_value] = entry
+        old_entry = self.transposition_table.get(hash_value)
+        if best_move is not None and (old_entry == None or old_entry.depth <= depth):
+            entry = ttEntry(best_value, depth, node_type, best_move)
+            self.transposition_table[hash_value] = entry
         return best_value
 
     # Domain specific chess position evaluation
