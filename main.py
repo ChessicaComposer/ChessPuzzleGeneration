@@ -1,60 +1,100 @@
-import time
-
+from collections import defaultdict
 import cli_ui
-
 from common.conditions import Conditions
 from genetic import FullBoard, Composer
 from genetic.utility import chess_int_to_board
 
+def is_nonzero_int(arg: str | None) -> bool:
+    if arg is None or not arg.isdigit() or int(arg) < 1:
+        return False
+    return True
 
-class Main(cli_ui):
+def print_args(generator, ply, population, limits) -> None:
+      print("Generator: ", generator,
+          " | Ply: ", ply,
+          " | Population: ", population,
+          " | Time-limit: ", limits["time"],
+          " | Generation-limit: ", limits["generation"],
+          " | Evaluation-limit: ", limits["evaluation"])
 
-    # Choices
-    _generators = ["FullBoard", "Composer"]
-    chosen_generator = cli_ui.ask_choice("Choose a generator", choices=_generators, sort=False)
+def welcome() -> None:
+    cli_ui.info_section("\nChessPuzzleGeneration :: Using Genetic Algorithms")
+    cli_ui.info("Configure the generator by answering the following.\n")
 
-    _ply = ["5", "7", "9"] # For Composer; default FullBoard's _ply to 5.
-    chosen_ply = int(cli_ui.ask_choice("Choose ply", choices=_ply, sort=False))
+def get_ply(generator):
+    if generator != "FullBoard":
+        return int(cli_ui.ask_string("Choose ply"))
+    else:
+        cli_ui.info_2("FullBoard has a default ply of 5.")
+        return 5
 
-    chosen_population = int(cli_ui.ask_string("Choose population size"))
+@cli_ui.Timer("FullBoard")
+def run_fullboard(population, conditions) -> list:
+    return FullBoard().run(int(population), conditions)
 
-    chosen_time_limit = int(cli_ui.ask_string("Choose time-limit in seconds"))
+@cli_ui.Timer("Composer")
+def run_composer(ply, population, conditions) -> list:
+    return Composer(ply).run(int(population), conditions)
 
-    chosen_generation_limit = int(cli_ui.ask_string("Choose generation-limit"))
 
-    chosen_evaluation_limit = int(cli_ui.ask_string("Choose evaluation-limit"))
+def main():
+    cli_ui.setup(color="always")
+    welcome()
 
-    # Running
+    cli_ui.info_count(0, 3, "Required questions")
+    generators = ["FullBoard", "Composer"]
+    chosen_generator = cli_ui.ask_choice("Choose a generator", choices=generators, sort=False)
+    print()
 
-    cli_ui.info_section("Welcome to ChessPuzzleGeneration.")
+    cli_ui.info_count(1, 3, "Required questions")
+    ply = get_ply(chosen_generator)
+    print()
 
-    time_: float
-    conditions = Conditions(chosen_time_limit, chosen_generation_limit, chosen_evaluation_limit)
+    cli_ui.info_count(2, 3, "Required questions")
+    chosen_population = cli_ui.ask_string("Choose population size")
+    if not is_nonzero_int(chosen_population):
+        cli_ui.info("Please enter a non-zero integer.")
+        exit(1)
+    print()
+
+    cli_ui.info_2("The following questions are optional")
+    limits: defaultdict[str, float | None] = defaultdict()
+    limits["time"] = cli_ui.ask_string("Choose time-limit in seconds")
+    print()
+
+    limits["generation"] = cli_ui.ask_string("Choose generation-limit")
+    print()
+
+    limits["evaluation"] = cli_ui.ask_string("Choose evaluation limit")
+
+    for limit in limits:
+        if not is_nonzero_int(limits[limit]):
+            limits[limit] = None
+        else:
+            limits[limit] = float(limits[limit])
+
+    conditions = Conditions(limits["time"], limits["generation"], limits["evaluation"])
+
     result = []
 
-    if chosen_generator is _generators[0]:
-        start_time = time.time()
-        result = FullBoard(chosen_ply).run(chosen_population, conditions)
-        time_ = time.time() - start_time
-    elif chosen_generator is _generators[1]:
-        start_time = time.time()
-        result = Composer(chosen_ply).run(chosen_population, conditions)
-        time_ = time.time() - start_time
-    else: raise ValueError
+    cli_ui.info(cli_ui.blue, "------------------------")
+
+    match chosen_generator:
+        case "FullBoard":
+            result = run_fullboard(chosen_population, conditions)
+        case "Composer":
+            result = run_composer(ply, chosen_population, conditions)
+        case _:
+            raise ValueError
+    cli_ui.info(cli_ui.blue, "------------------------")
 
     for res in result:
-        board = chess_int_to_board(c.body)
+        board = chess_int_to_board(res.body)
         print(board.fen())
 
-    print("\n==========================\n",
-          "Generator: ", _generators,
-          " | Ply: ", _ply,
-          " | Population: ", _population,
-          " | Time-limit: ", _time_limit,
-          " | Generation-limit: ", _generation_limit,
-          " | Evaluation-limit: ", _evaluation_limit)
+    cli_ui.info(cli_ui.blue, "------------------------")
+    print_args(chosen_generator, ply, chosen_population, limits)
 
-    print("\nElapsed generation time: ", time_, " seconds\n")
 
 if __name__ == '__main__':
-    Main()
+    main()
