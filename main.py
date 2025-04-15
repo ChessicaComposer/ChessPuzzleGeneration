@@ -1,5 +1,6 @@
 from collections import defaultdict
 import cli_ui
+from multiprocessing import freeze_support
 from common.conditions import Conditions
 from genetic import FullBoard, Composer
 from genetic.utility import chess_int_to_board
@@ -97,4 +98,5 @@ def main():
 
 
 if __name__ == '__main__':
+    freeze_support()
     main()
