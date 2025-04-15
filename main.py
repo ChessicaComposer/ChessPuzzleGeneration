@@ -1,139 +1,102 @@
-import time
+from collections import defaultdict
+import cli_ui
 from multiprocessing import freeze_support
 from common.conditions import Conditions
-from genetic import Composer
-from genetic import FullBoard
-import cmd
+from genetic import FullBoard, Composer
 from genetic.utility import chess_int_to_board
 
+def is_nonzero_int(arg: str | None) -> bool:
+    if arg is None or not arg.isdigit() or int(arg) < 1:
+        return False
+    return True
 
-class Main(cmd.Cmd):
-    prompt = 'ChessPuzzleGenerator>> '
-    intro = ('Welcome to the ChessPuzzleGenerator! Type "help" or "?" to list commands\n'
-             '- Usage: run <Composer | FullBoard> <Ply: int> <Population: int> <Time-limit: int | None> <Generation-limit: int | None> <Evaluation-limit: int | None>\n'
-             '- Example: run composer 5 100 14400 none none')
+def print_args(generator, ply, population, limits) -> None:
+      print("Generator: ", generator,
+          " | Ply: ", ply,
+          " | Population: ", population,
+          " | Time-limit: ", limits["time"],
+          " | Generation-limit: ", limits["generation"],
+          " | Evaluation-limit: ", limits["evaluation"])
 
-    def __init__(self):
-        super().__init__()
+def welcome() -> None:
+    cli_ui.info_section("\nChessPuzzleGeneration :: Using Genetic Algorithms")
+    cli_ui.info("Configure the generator by answering the following.\n")
 
-    def do_quit(self, args):
-        """Quits the program."""
-        return True
+def get_ply(generator):
+    if generator != "FullBoard":
+        return int(cli_ui.ask_string("Choose ply"))
+    else:
+        cli_ui.info_2("FullBoard has a default ply of 5.")
+        return 5
 
-    def do_run(self, args):
-        """Generate a chess puzzle.
-        Usage: run <generator-type> <population-size> <time-limit or None> <generation-limit or None> <evaluation-limit or None>
-        More info: run help <type>
-        """
+@cli_ui.Timer("FullBoard")
+def run_fullboard(population, conditions) -> list:
+    return FullBoard().run(int(population), conditions)
 
-        args = args.lower().split()
-        if len(args) == 0:
-            self.do_help("run")
-            return
-
-        result = list()
-        time_ = 0.0
-
-        match args[0]:
-            case "help":
-                if len(args) > 1:
-                    self._run_help(args[1])
-                    return
-            case "composer":
-                conditions = self._format_conditions(args)
-                if conditions is None: return
-                start_time = time.time()
-                result = Composer(int(args[1])).run(int(args[2]), conditions)
-                time_ = time.time() - start_time
-            case "fullboard":
-                conditions = self._format_conditions(args)
-                if conditions is None: return
-                start_time = time.time()
-                result = FullBoard(int(args[1])).run(int(args[2]), conditions)
-                time_ = time.time() - start_time
-            case _:
-                print("Unknown generator type.")
-                return
-
-        if len(args) < 6:
-            self._print_insufficient_args()
-            return
-
-        for c in result:
-            board = chess_int_to_board(c.body)
-            print(board.fen())
-
-        
-        self._print_args(args)
-        print("Elapsed generation time: ", time_, " seconds")
-
-        return
-
-    def _format_conditions(self, args: list[str]) -> Conditions | None:
-        if len(args) < 6:
-            self._print_insufficient_args()
-            print("- Example: run composer 100 None 100 None")
-            return None
-        aux = []
-        for arg in args[3:]:
-            if arg == 'none':
-                aux.append(None)
-            else: aux.append(float(arg))
-        return Conditions(aux[0], aux[1], aux[2])
-
-    def _run_help(self, arg):
-        match arg:
-            case "generator-type" | "generator" | "composer" | "fullboard":
-                print("Available generator types:\n"
-                      "==========================\n"
-                      "FullBoard | Composer\n"
-                      "- FullBoard: Initialises a standard chess board. Randomly moves pieces.\n"
-                      "- Composer: Initialises a chess board with each king in some random, valid position. Randomly adds pieces.\n")
-            case "ply-size" | "ply":
-                print("Ply size: How many moves ahead the generator will evaluate the board's state.")
-            case "population-size" | "population":
-                print("Population size: How many boards to initialise.\n"
-                      "- A generation will always keep this population size.")
-            case "time-limit" | "time":
-                print("Time limit: How long the generator will run in seconds.\n"
-                      "- If time's exceeded, it will finish its current generation before exiting.")
-            case "generation-limit" | "generation":
-                print("Generation limit: How many changes a board will undergo.")
-            case "evaluation-limit" | "evaluation":
-                print("Evaluation limit: The average score a generation of boards may get.")
-            case _:
-                print("Unknown argument type. Try 'run help', ex: 'run help generator'.")
-        return
-
-    def _print_insufficient_args(self):
-        print("Insufficient number of arguments.\n"
-              "===================================\n"
-              "- Usage: run <generator-type> <ply-size> <population-size> <time-limit or None> <generation-limit or None> <evaluation-limit or None>\n"
-              "- More info: run help <type>")
-
-    def _print_args(self, args):
-        generator = args[0]
-        ply = args[1]
-        population = args[2]
-        time_limit = args[3]
-        generation_limit = args[4]
-        evaluation_limit = args[5]
-        print("\n==========================\n",
-              "Generator: ", generator,
-              " | Ply: ", ply,
-              " | Population: ", population,
-              " | Time-limit: ", time_limit,
-              " | Generation-limit: ", generation_limit,
-              " | Evaluation-limit: ", evaluation_limit)
+@cli_ui.Timer("Composer")
+def run_composer(ply, population, conditions) -> list:
+    return Composer(ply).run(int(population), conditions)
 
 
-    def postloop(self):
-        print("Have a nice day!")
+def main():
+    cli_ui.setup(color="always")
+    welcome()
 
-    def postcmd(self, stop, args):
-        print()
-        return stop
+    cli_ui.info_count(0, 3, "Required questions")
+    generators = ["FullBoard", "Composer"]
+    chosen_generator = cli_ui.ask_choice("Choose a generator", choices=generators, sort=False)
+    print()
+
+    cli_ui.info_count(1, 3, "Required questions")
+    ply = get_ply(chosen_generator)
+    print()
+
+    cli_ui.info_count(2, 3, "Required questions")
+    chosen_population = cli_ui.ask_string("Choose population size")
+    if not is_nonzero_int(chosen_population):
+        cli_ui.info("Please enter a non-zero integer.")
+        exit(1)
+    print()
+
+    cli_ui.info_2("The following questions are optional")
+    limits: defaultdict[str, float | None] = defaultdict()
+    limits["time"] = cli_ui.ask_string("Choose time-limit in seconds")
+    print()
+
+    limits["generation"] = cli_ui.ask_string("Choose generation-limit")
+    print()
+
+    limits["evaluation"] = cli_ui.ask_string("Choose evaluation limit")
+
+    for limit in limits:
+        if not is_nonzero_int(limits[limit]):
+            limits[limit] = None
+        else:
+            limits[limit] = float(limits[limit])
+
+    conditions = Conditions(limits["time"], limits["generation"], limits["evaluation"])
+
+    result = []
+
+    cli_ui.info(cli_ui.blue, "------------------------")
+
+    match chosen_generator:
+        case "FullBoard":
+            result = run_fullboard(chosen_population, conditions)
+        case "Composer":
+            result = run_composer(ply, chosen_population, conditions)
+        case _:
+            raise ValueError
+    cli_ui.info(cli_ui.blue, "------------------------")
+
+    for res in result:
+        board = chess_int_to_board(res.body)
+        print(board.fen())
+
+    cli_ui.info(cli_ui.blue, "------------------------")
+    print_args(chosen_generator, ply, chosen_population, limits)
+
 
 if __name__ == '__main__':
     freeze_support()
-    Main().cmdloop()
+    main()
