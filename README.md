@@ -1,4 +1,4 @@
-# ChessPuzzleGeneration [![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)](https://www.python.org/)[![licenseMIT](https://img.shields.io/badge/license-MIT-blue)]
+# ChessPuzzleGeneration [![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)](https://www.python.org/) [![licenseMIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/ChessicaComposer/ChessPuzzleGeneration/blob/main/LICENSE)
 > [!NOTE]
 > This is an artefact of a bachelor project in Software Development @ the IT University of Copenhagen (2025). <br>
 > Project title: **Algorithmic Generation of Chess Puzzles**.
@@ -8,7 +8,9 @@ It has a basic chess engine for evaluating the board state, and uses a genetic a
 
 ## Installation
 
-**Requires Python 3.13 or newer.**
+**Requires**
+- Python 3.13 or newer
+- pip 25.3 or newer
 
 Clone the repository and install dependencies:
 
@@ -17,6 +19,7 @@ git clone https://github.com/ChessicaComposer/ChessPuzzleGeneration/
 cd ChessPuzzleGeneration
 pip install -r requirements.txt
 ```
+_**Note** that there are currently no releases._
 
 ## Usage
 
@@ -85,5 +88,4 @@ Composer: Initialises a chess board with each king in some random, valid positio
 
 ## License
 
-MIT License. See the `LICENSE` file for details.
-
+MIT License. See the [`LICENSE`](https://github.com/ChessicaComposer/ChessPuzzleGeneration/blob/main/LICENSE) file for details.
