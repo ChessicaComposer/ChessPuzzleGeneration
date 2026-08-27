@@ -1,5 +1,4 @@
-# ChessPuzzleGeneration [![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)](https://www.python.org/)
-
+# ChessPuzzleGeneration [![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff)](https://www.python.org/)[![licenseMIT](https://img.shields.io/badge/license-MIT-blue)]
 > [!NOTE]
 > This is an artefact of a bachelor project in Software Development @ the IT University of Copenhagen (2025). <br>
 > Project title: **Algorithmic Generation of Chess Puzzles**.
